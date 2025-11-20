@@ -58,7 +58,7 @@ export async function POST(request) {
       const configuredScript = process.env.PYTHON_PARSER_SCRIPT;
       const defaultScript = path.join(process.cwd(), 'services', 'resume_parser.py');
       const pythonScript = configuredScript && configuredScript.trim().length > 0 ? configuredScript : defaultScript;
-      const pythonBinary = process.env.PYTHON_BIN || 'python';
+      const pythonBinary = process.env.PYTHON_BIN || path.join(process.cwd(), '.venv', 'bin', 'python');
       
       const pythonProcess = spawn(pythonBinary, [pythonScript, tempPath], {
         stdio: ['ignore', 'pipe', 'pipe']

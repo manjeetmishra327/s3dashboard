@@ -291,7 +291,7 @@ def extract_projects(text):
         if re.match(r'^[•\-\*\d+\.]', line) or (current_project and len(line) > 50):
             if current_project:
                 projects.append(' '.join(current_project))
-            current_project = [line.lstrip('•\-\*\d. ')]
+            current_project = [line.lstrip(r'•\-\*\d. ')]
         else:
             if current_project:
                 current_project.append(line)

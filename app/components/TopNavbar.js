@@ -6,7 +6,6 @@ export default function TopNavbar({ onLogout, user }) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [resumeScore, setResumeScore] = useState(null);
   const [notifications, setNotifications] = useState([
     { id: 1, message: 'New job recommendation available', time: '2 min ago', unread: true, type: 'job' },
     { id: 2, message: 'Resume analysis completed', time: '1 hour ago', unread: true, type: 'resume' },
@@ -31,43 +30,6 @@ export default function TopNavbar({ onLogout, user }) {
   }, []);
 
   const unreadCount = notifications.filter(n => n.unread).length;
-
-  // Load latest resume score for header progress pill
-  useEffect(() => {
-    try {
-      const userId = user?.id || user?._id;
-      if (!userId) return;
-      const savedScore = localStorage.getItem(`resumeScore_${userId}`);
-      if (savedScore) {
-        const parsed = parseInt(savedScore);
-        if (!Number.isNaN(parsed)) setResumeScore(parsed);
-      }
-    } catch (_) {
-      // ignore
-    }
-  }, [user]);
-
-  // React to new analyses to keep the score in sync without reload
-  useEffect(() => {
-    const refreshScore = () => {
-      try {
-        const userId = user?.id || user?._id;
-        if (!userId) return;
-        const savedScore = localStorage.getItem(`resumeScore_${userId}`);
-        const parsed = savedScore ? parseInt(savedScore) : null;
-        if (parsed != null && !Number.isNaN(parsed)) {
-          setResumeScore(parsed);
-        }
-      } catch (_) {}
-    };
-
-    window.addEventListener('resumeAnalyzed', refreshScore);
-    const interval = setInterval(refreshScore, 2000);
-    return () => {
-      window.removeEventListener('resumeAnalyzed', refreshScore);
-      clearInterval(interval);
-    };
-  }, [user]);
 
   const markAllAsRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
@@ -102,8 +64,7 @@ export default function TopNavbar({ onLogout, user }) {
     }
   };
 
-  // Get user's first name for display
-  const firstName = user?.name ? user.name.split(' ')[0] : 'User';
+  const resumeScore = user?.resumeScore;
   const userRole = user?.role || 'Student';
 
   return (
@@ -136,7 +97,7 @@ export default function TopNavbar({ onLogout, user }) {
           <span className="ai-text">AI Active</span>
           <span className="ai-glow"></span>
         </div>
-        <div className="score-pill" title={resumeScore != null ? `Resume Score: ${resumeScore}/100` : 'Resume Score'}>
+        <div className="score-pill" title={`${resumeScore}/100`}>
           <span className="score-label">Resume Score</span>
           <div className="score-bar">
             <div

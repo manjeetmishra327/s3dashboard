@@ -46,7 +46,7 @@ const itemFadeIn = {
   }
 };
 
-const ResumeAnalysis = ({ user }) => {
+const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
   const [isUploading, setIsUploading] = useState(false);
   const [resumeScore, setResumeScore] = useState(0);
   const [analysisComplete, setAnalysisComplete] = useState(false);
@@ -570,6 +570,9 @@ const ResumeAnalysis = ({ user }) => {
       
       // Dispatch event to notify dashboard of update
       window.dispatchEvent(new Event('resumeAnalyzed'));
+      if (onAnalysisComplete) {
+        onAnalysisComplete();
+      }
 
       // Non-blocking: persist analysis and timing to backend
       const parseEnd = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();

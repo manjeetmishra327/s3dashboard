@@ -19,6 +19,17 @@ export default function Dashboard({ onLogout }) {
 
   useEffect(() => {
     fetchUserProfile();
+
+    const handleResumeAnalyzed = () => {
+      console.log('Resume analysis finished, refreshing profile...');
+      fetchUserProfile();
+    };
+
+    window.addEventListener('resumeAnalyzed', handleResumeAnalyzed);
+
+    return () => {
+      window.removeEventListener('resumeAnalyzed', handleResumeAnalyzed);
+    };
   }, []);
 
   const fetchUserProfile = async () => {
@@ -43,7 +54,10 @@ export default function Dashboard({ onLogout }) {
 
       if (response.ok) {
         const data = await response.json();
-        setUser(data.user);
+        const userId = data.user?.id || data.user?._id;
+        const savedScore = localStorage.getItem(`resumeScore_${userId}`);
+        const resumeScore = savedScore ? parseInt(savedScore) : null;
+        setUser({ ...data.user, resumeScore });
       } else {
         // Token might be invalid, clear it and logout user
         console.log('Profile fetch failed, clearing token and logging out'); // Debug log
@@ -72,7 +86,7 @@ export default function Dashboard({ onLogout }) {
       case 'dashboard':
         return <DashboardHome user={user} onNavigate={setActiveModule} />;
       case 'resume-analysis':
-        return <ResumeAnalysis user={user} />;
+        return <ResumeAnalysis user={user} onAnalysisComplete={fetchUserProfile} />;
       case 'resume-scorecard':
         return <ResumeScorecard user={user} />;
       case 'job-recommendations':
