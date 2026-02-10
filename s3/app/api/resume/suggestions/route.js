@@ -3,29 +3,10 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { MongoClient, ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
-import { existsSync } from 'fs';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
 const JWT_SECRET = process.env.JWT_SECRET;
-
-function resolvePythonBinary() {
-  const configured = process.env.PYTHON_BIN;
-  if (configured && configured.trim().length > 0 && existsSync(configured)) {
-    return configured;
-  }
-
-  const isWin = process.platform === 'win32';
-  const venvPython = isWin
-    ? path.join(process.cwd(), '.venv', 'Scripts', 'python.exe')
-    : path.join(process.cwd(), '.venv', 'bin', 'python');
-
-  if (existsSync(venvPython)) {
-    return venvPython;
-  }
-
-  return 'python';
-}
 
 export async function POST(request) {
   let client = null;
@@ -78,7 +59,7 @@ export async function POST(request) {
     
     const args = [pythonScript, JSON.stringify(enhancedData)];
 
-    const pythonProcess = spawn(resolvePythonBinary(), args, {
+    const pythonProcess = spawn('python', args, {
       env: {
         ...process.env,
         GEMINI_API_KEY: process.env.GEMINI_API_KEY

@@ -4,24 +4,6 @@ import { spawn } from 'child_process';
 import path from 'path';
 import { existsSync } from 'fs';
 
-function resolvePythonBinary() {
-  const configured = process.env.PYTHON_BIN;
-  if (configured && configured.trim().length > 0 && existsSync(configured)) {
-    return configured;
-  }
-
-  const isWin = process.platform === 'win32';
-  const venvPython = isWin
-    ? path.join(process.cwd(), '.venv', 'Scripts', 'python.exe')
-    : path.join(process.cwd(), '.venv', 'bin', 'python');
-
-  if (existsSync(venvPython)) {
-    return venvPython;
-  }
-
-  return 'python';
-}
-
 export async function POST(request) {
   try {
     const formData = await request.formData();
@@ -76,7 +58,7 @@ export async function POST(request) {
       const configuredScript = process.env.PYTHON_PARSER_SCRIPT;
       const defaultScript = path.join(process.cwd(), 'services', 'resume_parser.py');
       const pythonScript = configuredScript && configuredScript.trim().length > 0 ? configuredScript : defaultScript;
-      const pythonBinary = resolvePythonBinary();
+      const pythonBinary = process.env.PYTHON_BIN || 'python';
       
       const pythonProcess = spawn(pythonBinary, [pythonScript, tempPath], {
         stdio: ['ignore', 'pipe', 'pipe']

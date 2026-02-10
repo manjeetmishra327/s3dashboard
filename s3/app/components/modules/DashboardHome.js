@@ -343,59 +343,6 @@ export default function DashboardHome({ user, onNavigate }) {
   // Get user's first name for personalized greeting
   const firstName = user?.name ? user.name.split(' ')[0] : 'Student';
 
-  const nextBestAction = useMemo(() => {
-    const hasAnalysis = Boolean(lastAnalysis);
-    if (!hasAnalysis) {
-      return {
-        badge: 'AI Recommended',
-        title: 'Upload your resume to generate a baseline score',
-        detail: 'You’ll get an ATS-style score, skill extraction, and prioritized improvements in seconds.',
-        cta: 'Upload Resume',
-        onClick: () => onNavigate && onNavigate('resume-analysis')
-      };
-    }
-
-    const score = typeof lastAnalysis?.score === 'number' ? lastAnalysis.score : 0;
-    if (score < 55) {
-      return {
-        badge: 'High Impact',
-        title: 'Fix the top 2 weak areas to lift your score quickly',
-        detail: 'Start with Contact + Experience quality. Add clear role bullets with measurable outcomes.',
-        cta: 'Improve Resume',
-        onClick: () => onNavigate && onNavigate('resume-analysis')
-      };
-    }
-
-    if (score < 70) {
-      return {
-        badge: 'AI Recommended',
-        title: 'Tighten ATS keyword alignment for your target role',
-        detail: 'Match your Skills section to the role description and remove vague bullets.',
-        cta: 'Run New Analysis',
-        onClick: () => onNavigate && onNavigate('resume-analysis')
-      };
-    }
-
-    return {
-      badge: 'AI Recommended',
-      title: 'Tailor your resume for a specific job description',
-      detail: 'Small edits to keywords and first two experience bullets usually have the highest impact.',
-      cta: 'Tailor Resume',
-      onClick: () => onNavigate && onNavigate('resume-analysis')
-    };
-  }, [lastAnalysis, onNavigate]);
-
-  const aiTipsSorted = useMemo(() => {
-    const tips = Array.isArray(aiTips) ? [...aiTips] : [];
-    const impactRank = (tip) => {
-      const text = `${tip?.priority || ''} ${tip?.impact || ''} ${tip?.title || ''} ${tip?.category || ''} ${tip?.detail || ''} ${tip?.text || ''}`.toLowerCase();
-      if (text.includes('high')) return 3;
-      if (text.includes('medium')) return 2;
-      return 1;
-    };
-    return tips.sort((a, b) => impactRank(b) - impactRank(a));
-  }, [aiTips]);
-
   return (
     <div className="dashboard-home-modern">
       {/* Modern Dark Gradient Background */}
@@ -415,9 +362,8 @@ export default function DashboardHome({ user, onNavigate }) {
           <i className="fas fa-calendar-day"></i>
           <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
         </div>
-        <h1 className="page-title-modern">Welcome back, {firstName}</h1>
+        <h1 className="page-title-modern">Welcome back, {firstName}! 👋</h1>
         <p className="page-subtitle-modern">Here's what's happening with your career journey today.</p>
-        <p className="page-tagline-modern">Your AI co-pilot for resume quality, ATS readiness, and job-focused improvements.</p>
       </motion.div>
 
       {/* Stats Overview - Modern Cards */}
@@ -425,11 +371,11 @@ export default function DashboardHome({ user, onNavigate }) {
         {stats.map((stat, index) => (
           <motion.div 
             key={index} 
-            className={`stat-card-modern glass-card ${stat.title === 'Resume Score' ? 'primary' : 'secondary'}`}
+            className="stat-card-modern glass-card"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
-            whileHover={{ y: -6, scale: stat.title === 'Resume Score' ? 1.03 : 1.01, transition: { duration: 0.2 } }}
+            whileHover={{ y: -8, scale: 1.02, transition: { duration: 0.2 } }}
           >
             <div className="stat-card-top">
               <div className={`stat-icon-modern ${stat.color}`}>
@@ -734,44 +680,11 @@ export default function DashboardHome({ user, onNavigate }) {
                 <i className="fas fa-cloud-upload-alt" style={{ color: '#a5b4fc' }}></i>
               </motion.div>
               <p>Drop or select a resume to analyze</p>
-              <button className="btn-primary cta" onClick={() => onNavigate && onNavigate('resume-analysis')}>
+              <button className="btn-primary" onClick={() => onNavigate && onNavigate('resume-analysis')}>
                 <i className="fas fa-file-import"></i>
                 Choose File
               </button>
-              <div className="cta-microcopy">PDF/DOCX supported. You’ll get a score + prioritized improvements.</div>
             </div>
-          </motion.div>
-
-          {/* Next Best Action */}
-          <motion.div 
-            className="content-card-modern glass-card-dark"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.42 }}
-          >
-            <div className="card-header-modern" style={{ alignItems: 'flex-start' }}>
-              <div>
-                <h2 className="card-title-modern">
-                  <i className="fas fa-bolt"></i>
-                  Next Best Action
-                </h2>
-                <div className="card-header-subtle">Personalized based on your latest activity</div>
-              </div>
-              <span className="ai-badge"><i className="fas fa-robot"></i>{nextBestAction.badge}</span>
-            </div>
-            <div className="insights-list">
-              <div className="insight-item" onClick={nextBestAction.onClick}>
-                <div className="insight-content">
-                  <div className="insight-text"><strong>{nextBestAction.title}</strong></div>
-                  <div className="insight-time">{nextBestAction.detail}</div>
-                </div>
-                <span className="impact-pill">Do now</span>
-              </div>
-            </div>
-            <button className="btn-primary" onClick={nextBestAction.onClick}>
-              <i className="fas fa-arrow-right"></i>
-              {nextBestAction.cta}
-            </button>
           </motion.div>
 
           {/* Resume Strength Analyzer */}
@@ -877,25 +790,20 @@ export default function DashboardHome({ user, onNavigate }) {
             transition={{ duration: 0.6, delay: 0.5 }}
           >
             <div className="card-header-modern">
-              <div>
-                <h2 className="card-title-modern">
-                  <i className="fas fa-lightbulb"></i>
-                  AI Suggestions
-                </h2>
-                <div className="card-header-subtle">Prioritized by estimated impact</div>
-              </div>
-              <span className="ai-badge"><i className="fas fa-robot"></i>Live</span>
+              <h2 className="card-title-modern">
+                <i className="fas fa-lightbulb"></i>
+                AI Suggestions
+              </h2>
             </div>
             <div className="insights-list">
-              {aiTipsSorted && aiTipsSorted.length > 0 ? (
-                aiTipsSorted.slice(0, 3).map((tip, idx) => (
-                  <div key={idx} className={`insight-item ${idx === 0 ? 'ai-recommended' : ''}`}>
+              {aiTips && aiTips.length > 0 ? (
+                aiTips.map((tip, idx) => (
+                  <div key={idx} className="insight-item">
                     <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
                     <div className="insight-content">
-                      <div className="insight-text"><strong>{tip.title || `Tip ${idx+1}`}</strong>{idx === 0 ? <span className="ai-badge" style={{ marginLeft: '0.6rem' }}><i className="fas fa-star"></i>AI Recommended</span> : null}</div>
+                      <div className="insight-text"><strong>{tip.title || `Tip ${idx+1}`}</strong></div>
                       <div className="insight-time">{tip.detail || tip.text || tip}</div>
                     </div>
-                    {idx === 0 ? <span className="impact-pill">High Impact</span> : null}
                   </div>
                 ))
               ) : (
