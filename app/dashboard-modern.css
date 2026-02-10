@@ -7,9 +7,9 @@
 .dashboard-home-modern {
   min-height: 100vh;
   background:
-    radial-gradient(900px 520px at 20% 0%, rgba(168, 85, 247, 0.14) 0%, rgba(168, 85, 247, 0) 60%),
-    radial-gradient(820px 520px at 80% 10%, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 58%),
-    radial-gradient(1100px 780px at 50% 110%, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0) 55%),
+    radial-gradient(900px 520px at 20% 0%, rgba(168, 85, 247, 0.11) 0%, rgba(168, 85, 247, 0) 60%),
+    radial-gradient(820px 520px at 80% 10%, rgba(99, 102, 241, 0.09) 0%, rgba(99, 102, 241, 0) 58%),
+    radial-gradient(1100px 780px at 50% 110%, rgba(0, 0, 0, 0.48) 0%, rgba(0, 0, 0, 0) 55%),
     linear-gradient(135deg, #0b0b12 0%, #14101f 55%, #0b0b12 100%);
   padding: 2rem;
   position: relative;
@@ -160,8 +160,9 @@
 
 .stat-card-modern.primary {
   background: rgba(255, 255, 255, 0.11);
-  border-color: rgba(165, 180, 252, 0.35);
-  box-shadow: 0 18px 64px rgba(0, 0, 0, 0.55), 0 12px 28px rgba(99, 102, 241, 0.18);
+  border-color: rgba(165, 180, 252, 0.32);
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.42), 0 8px 20px rgba(99, 102, 241, 0.14);
+  padding: 2rem;
 }
 
 .stat-card-modern.primary::after {
@@ -169,13 +170,13 @@
   position: absolute;
   inset: -1px;
   pointer-events: none;
-  background: radial-gradient(600px 220px at 20% 0%, rgba(168, 85, 247, 0.22) 0%, rgba(168, 85, 247, 0) 60%);
+  background: radial-gradient(600px 220px at 20% 0%, rgba(168, 85, 247, 0.18) 0%, rgba(168, 85, 247, 0) 60%);
   opacity: 1;
 }
 
 .stat-card-modern.secondary {
-  background: rgba(255, 255, 255, 0.06);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.10);
 }
 
 .stat-card-modern::before {
@@ -260,6 +261,10 @@
   line-height: 1;
 }
 
+.stat-card-modern.primary .stat-value-modern {
+  font-size: 2.5rem;
+}
+
 .stat-label-modern {
   font-size: 0.95rem;
   font-weight: 500;
@@ -276,49 +281,51 @@
 .dashboard-content-modern {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 2rem;
+  gap: 2.25rem;
   position: relative;
   z-index: 1;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
 .dashboard-section-modern {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 /* Glass Card Dark */
 .glass-card-dark {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 20px;
   padding: 1.75rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.16);
 }
 
 .glass-card-dark:hover {
   background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.2);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(102, 126, 234, 0.15);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38), 0 4px 12px rgba(102, 126, 234, 0.12);
   transform: translateY(-2px);
 }
 
 /* Content Card Modern */
 .content-card-modern {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.07);
   backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: 20px;
   padding: 1.75rem;
   transition: all 0.3s ease;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4), 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.16);
 }
 
 .content-card-modern:hover {
   transform: translateY(-2px);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(102, 126, 234, 0.15);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.38), 0 4px 12px rgba(102, 126, 234, 0.12);
 }
 
 /* Card Header Modern */
@@ -687,11 +694,14 @@
 }
 
 .btn-primary.cta {
-  box-shadow: 0 14px 42px rgba(102, 126, 234, 0.35), 0 10px 24px rgba(168, 85, 247, 0.18);
+  box-shadow: 0 10px 32px rgba(102, 126, 234, 0.28), 0 6px 16px rgba(168, 85, 247, 0.14);
+  transform: scale(1.05);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .btn-primary.cta:hover {
-  box-shadow: 0 18px 54px rgba(102, 126, 234, 0.42), 0 12px 28px rgba(168, 85, 247, 0.22);
+  box-shadow: 0 14px 40px rgba(102, 126, 234, 0.32), 0 8px 20px rgba(168, 85, 247, 0.16);
+  transform: scale(1.08) translateY(-2px);
 }
 
 .cta-microcopy {
@@ -730,6 +740,12 @@
 .insight-item.ai-recommended {
   border-color: rgba(168, 85, 247, 0.22);
   background: rgba(255, 255, 255, 0.05);
+  padding: 1.125rem 1rem;
+}
+
+.insight-item.ai-recommended:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
 }
 
 .card-header-subtle {

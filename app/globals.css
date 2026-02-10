@@ -24,8 +24,8 @@
   overflow-y: auto;
   transition: all 0.3s ease;
   z-index: 1000;
-  box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5), 2px 0 8px rgba(102, 126, 234, 0.3);
-  border-right: none;
+  box-shadow: 3px 0 16px rgba(0, 0, 0, 0.38), 1px 0 6px rgba(102, 126, 234, 0.24);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .sidebar.collapsed {
@@ -70,7 +70,7 @@
   border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.875rem;
@@ -138,14 +138,14 @@
 }
 
 .nav-menu li {
-  margin: 0.25rem 0;
+  margin: 0.125rem 0;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   color: white;
   text-decoration: none;
   background: none;
@@ -154,7 +154,7 @@
   text-align: left;
   cursor: pointer;
   transition: all 0.2s;
-  border-radius: 0;
+  border-radius: 0 12px 12px 0;
 }
 
 .nav-item:hover {
@@ -162,13 +162,15 @@
 }
 
 .nav-item.active {
-  background-color: rgba(255, 255, 255, 0.2);
-  border-right: 3px solid white;
+  background-color: rgba(255, 255, 255, 0.16);
+  border-right: 3px solid rgba(255, 255, 255, 0.85);
+  font-weight: 500;
 }
 
 .nav-item i {
   width: 1.25rem;
   text-align: center;
+  font-size: 1.125rem;
 }
 
 .main-content {
@@ -183,7 +185,7 @@
 
 .top-navbar {
   background: rgba(26, 29, 41, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   padding: 0.75rem 1.5rem;
   display: flex;
   align-items: center;
@@ -191,7 +193,7 @@
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24);
   backdrop-filter: blur(20px);
 }
 
@@ -357,7 +359,7 @@
   background: none;
   border: none;
   padding: 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   cursor: pointer;
   position: relative;
   color: rgba(255, 255, 255, 0.7);
@@ -403,9 +405,9 @@
   right: 0;
   width: 350px;
   background: rgba(26, 29, 41, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0.75rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
   margin-top: 0.5rem;
   z-index: 1000;
   animation: slideDown 0.2s ease;
@@ -547,7 +549,7 @@
   background: none;
   border: none;
   padding: 0.5rem;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   cursor: pointer;
   color: rgba(255, 255, 255, 0.9);
   transition: all 0.2s ease;
@@ -594,9 +596,9 @@
   right: 0;
   width: 280px;
   background: rgba(26, 29, 41, 0.98);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 0.75rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.38);
   margin-top: 0.5rem;
   z-index: 1000;
   animation: slideDown 0.2s ease;
@@ -657,7 +659,7 @@
   padding: 0.75rem 1rem;
   background: none;
   border: none;
-  border-radius: 0.5rem;
+  border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s;
   color: rgba(255, 255, 255, 0.8);
