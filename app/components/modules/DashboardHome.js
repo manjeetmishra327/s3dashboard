@@ -416,8 +416,8 @@ export default function DashboardHome({ user, onNavigate }) {
           <span>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
         </div>
         <h1 className="page-title-modern">Welcome back, {firstName}</h1>
-        <p className="page-subtitle-modern">Here's what's happening with your career journey today.</p>
-        <p className="page-tagline-modern">Your AI co-pilot for resume quality, ATS readiness, and job-focused improvements.</p>
+        <p className="page-subtitle-modern">Track your resume progress and get AI-powered insights</p>
+        <p className="page-tagline-modern">Upload resumes, analyze scores, and optimize for ATS success</p>
       </motion.div>
 
       {/* Stats Overview - Modern Cards */}
@@ -738,7 +738,7 @@ export default function DashboardHome({ user, onNavigate }) {
                 <i className="fas fa-file-import"></i>
                 Choose File
               </button>
-              <div className="cta-microcopy">PDF/DOCX supported. You’ll get a score + prioritized improvements.</div>
+              <div className="cta-microcopy">Takes less than 10 seconds</div>
             </div>
           </motion.div>
 
