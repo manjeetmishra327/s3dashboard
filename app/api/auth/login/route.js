@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { normalizeRole } from '../../_utils/auth';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
@@ -46,13 +47,15 @@ export async function POST(request) {
       );
     }
 
+    const normalizedRole = normalizeRole(user?.role);
+
     // Generate JWT token
     const token = jwt.sign(
       { 
         userId: user._id.toString(),
         email: user.email,
         name: user.name,
-        role: user.role
+        role: normalizedRole
       },
       JWT_SECRET,
       { expiresIn: '7d' }
@@ -72,13 +75,17 @@ export async function POST(request) {
     // Convert ObjectId to string for JSON serialization
     const userForResponse = {
       ...userWithoutPassword,
-      _id: userWithoutPassword._id.toString()
+      _id: userWithoutPassword._id.toString(),
+      role: normalizedRole
     };
+
+    const redirectTo = normalizedRole === 'mentor' ? '/mentor-dashboard' : '/dashboard';
 
     return NextResponse.json({
       message: 'Login successful',
       token,
-      user: userForResponse
+      user: userForResponse,
+      redirectTo
     });
 
   } catch (error) {

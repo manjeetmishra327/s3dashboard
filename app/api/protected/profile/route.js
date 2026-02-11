@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { MongoClient, ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
+import { normalizeRole } from '../../api/_utils/auth';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
@@ -63,7 +64,8 @@ export async function GET(request) {
     // Convert ObjectId to string for JSON serialization
     const userForResponse = {
       ...userProfile,
-      _id: userProfile._id.toString()
+      _id: userProfile._id.toString(),
+      role: normalizeRole(userProfile?.role)
     };
 
     return NextResponse.json({

@@ -2,15 +2,23 @@
 
 import { useState, useEffect, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
 import { Briefcase, Zap } from 'lucide-react';
 
 
 const MatchProgressBar = ({ score }) => {
+  const [fill, setFill] = useState(0);
+
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setFill(Number.isFinite(score) ? score : 0));
+    return () => cancelAnimationFrame(id);
+  }, [score]);
+
   return (
     <div className="w-full bg-slate-200/70 rounded-full h-2 dark:bg-white/10">
-      <div className="bg-white/30 h-2 rounded-full transition-all duration-500" style={{ width: `${score}%` }}></div>
+      <div className="bg-white/30 h-2 rounded-full transition-all duration-700 ease-out" style={{ width: `${fill}%` }}></div>
     </div>
   );
 };
@@ -23,7 +31,7 @@ const JobCard = ({ job, isTop }) => {
   const overlapBadges = overlapItems.slice(0, 3);
 
   return (
-    <Card className={`group overflow-hidden transition-all duration-300 ease-in-out bg-[var(--card-bg)] border-[var(--card-border)] hover:bg-[var(--elevated-bg)] hover:border-[var(--elevated-border)] hover:shadow-[var(--shadow-soft)] ${isTop ? 'ring-1 ring-[var(--accent-primary)]/20 shadow-[var(--shadow-soft)]' : ''}`}>
+    <Card className={`group overflow-hidden transition-all duration-300 ease-out bg-[var(--card-bg)] border-[var(--card-border)] hover:bg-[var(--elevated-bg)] hover:border-[var(--elevated-border)] hover:shadow-[var(--shadow-soft)] hover:-translate-y-0.5 ${isTop ? 'ring-1 ring-[var(--accent-primary)]/20 shadow-[var(--shadow-soft)]' : ''}`}>
       <CardContent className="p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0 md:flex-[1.35]">
@@ -46,7 +54,7 @@ const JobCard = ({ job, isTop }) => {
 
           <div className="md:flex-[0.9] flex flex-col gap-2 md:items-center md:justify-center">
             <div className="flex items-center gap-3">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-primary)]/35 bg-[var(--accent-primary-light)] text-[var(--accent-primary)] font-semibold">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-[var(--accent-primary)]/40 bg-[var(--accent-primary-light)] text-[var(--accent-primary)] font-semibold shadow-[0_0_0_1px_rgba(139,92,246,0.12),0_10px_24px_rgba(0,0,0,0.35)] group-hover:shadow-[0_0_0_1px_rgba(139,92,246,0.18),0_12px_28px_rgba(0,0,0,0.4)] transition-shadow duration-300">
                 {job.match}%
               </div>
               <div className="min-w-0">
@@ -71,7 +79,12 @@ const JobCard = ({ job, isTop }) => {
           <div className="md:flex-[0.65] flex items-center justify-between md:justify-end gap-3">
             <div className="text-xs text-white/45 hidden md:block">via {job.via}</div>
             <div className="flex items-center gap-2">
-              <Button asChild variant="outline" size="sm" className="border-white/10 bg-white/5 text-white/85 hover:bg-white/10">
+              <Button
+                asChild
+                variant="default"
+                size="sm"
+                className="bg-[var(--accent-primary)] hover:bg-[var(--accent-primary-hover)] text-white shadow-[var(--shadow-subtle)] hover:shadow-[var(--shadow-soft)] transition-all duration-200 hover:scale-[1.02]"
+              >
                 <a href={job.apply_link} target="_blank" rel="noopener noreferrer">Apply</a>
               </Button>
               <Button asChild variant="outline" size="sm" className="border-white/10 bg-white/5 text-white/80 hover:bg-white/10">
@@ -87,19 +100,19 @@ const JobCard = ({ job, isTop }) => {
 
 const SkeletonCard = () => (
   <Card className="flex flex-col h-full">
-    <CardHeader className="pb-4">
+    <div className="pb-4 p-6">
       <div className="w-2/3 h-6 mb-2 bg-slate-200 rounded animate-pulse dark:bg-slate-700"></div>
       <div className="w-1/2 h-4 bg-slate-200 rounded animate-pulse dark:bg-slate-700"></div>
-    </CardHeader>
+    </div>
     <CardContent>
       <div className="w-full h-4 mt-4 bg-slate-200 rounded animate-pulse dark:bg-slate-700"></div>
       <div className="w-5/6 h-4 mt-2 bg-slate-200 rounded animate-pulse dark:bg-slate-700"></div>
       <div className="w-3/4 h-4 mt-2 bg-slate-200 rounded animate-pulse dark:bg-slate-700"></div>
     </CardContent>
-    <CardFooter className="flex justify-between">
+    <div className="flex justify-between p-6">
       <div className="w-24 h-9 bg-slate-200 rounded animate-pulse dark:bg-slate-700"></div>
       <div className="w-10 h-10 bg-slate-200 rounded-full animate-pulse dark:bg-slate-700"></div>
-    </CardFooter>
+    </div>
   </Card>
 );
 
@@ -176,20 +189,20 @@ export default function JobRecommendations() {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-transparent">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-[linear-gradient(180deg,var(--bg-primary)_0%,var(--bg-secondary)_100%)]">
       <div className="max-w-screen-xl mx-auto">
-        <header className="p-6 mb-8 bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-subtle)]">
+        <header className="p-6 mb-8 bg-[var(--elevated-bg)] border border-[var(--elevated-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-white/5">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h1 className="text-2xl md:text-3xl font-semibold text-white/95">AI Matched Jobs</h1>
               <p className="mt-1 text-sm md:text-base text-white/60">Based on your resume analysis and semantic similarity</p>
             </div>
             <div className="flex items-center gap-3 sm:justify-end">
-              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/10 bg-white/5">
+              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/12 bg-white/8">
                 <div className="text-[11px] uppercase tracking-wide text-white/45">Match quality</div>
                 <div className="mt-0.5 text-sm font-semibold text-white/85">{matchQuality}</div>
               </div>
-              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/10 bg-white/5">
+              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/12 bg-white/8">
                 <div className="text-[11px] uppercase tracking-wide text-white/45">Jobs found</div>
                 <div className="mt-0.5 text-sm font-semibold text-white/85">{sortedJobs.length}</div>
               </div>
@@ -208,7 +221,16 @@ export default function JobRecommendations() {
           {!loading && jobs.length > 0 && (
             <>
               <div className="grid grid-cols-1 gap-4">
-                {sortedJobs.map((job, idx) => <JobCard key={job.job_id} job={job} isTop={idx === 0} />)}
+                {sortedJobs.map((job, idx) => (
+                  <motion.div
+                    key={job.job_id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: idx * 0.05 }}
+                  >
+                    <JobCard job={job} isTop={idx === 0} />
+                  </motion.div>
+                ))}
               </div>
               <div className="flex justify-center mt-8">
                 <Button onClick={handleLoadMore} disabled={isLoadingMore}>

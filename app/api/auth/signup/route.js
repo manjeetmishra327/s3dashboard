@@ -1,13 +1,15 @@
 import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
 import bcrypt from 'bcryptjs';
+import { normalizeRole } from '../../_utils/auth';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
 
 export async function POST(request) {
   try {
-    const { name, email, password, phone } = await request.json();
+    const { name, email, password, phone, role } = await request.json();
+    const normalizedRole = normalizeRole(role);
 
     // Validate input
     if (!name || !email || !password || !phone) {
@@ -50,7 +52,7 @@ export async function POST(request) {
       email,
       password: hashedPassword,
       phone,
-      role: 'Student',
+      role: normalizedRole,
       createdAt: new Date(),
       updatedAt: new Date(),
       profile: {
