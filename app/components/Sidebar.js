@@ -18,9 +18,10 @@ export default function Sidebar({ activeModule, onModuleChange, user }) {
           { id: 'mentor-connect', label: 'Mentor Connect', icon: 'fas fa-users' },
         ]
       : [
-          { id: 'mentor-connect', label: 'Mentor Connect', icon: 'fas fa-users' },
+          { id: 'student-requests', label: 'Student Requests', icon: 'fas fa-user-plus' },
+          { id: 'my-sessions', label: 'My Sessions', icon: 'fas fa-calendar-check' },
+          { id: 'availability', label: 'Availability', icon: 'fas fa-toggle-on' },
         ]),
-    { id: 'ai-assistant', label: 'AI Assistant', icon: 'fas fa-comments' },
     { id: 'settings', label: 'Settings / Profile', icon: 'fas fa-cog' },
   ];
 

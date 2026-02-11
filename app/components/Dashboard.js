@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import TopNavbar from './TopNavbar';
 import DashboardHome from './modules/DashboardHome';
+import MentorDashboardHome from './modules/MentorDashboardHome';
 import ResumeAnalysis from './modules/ResumeAnalysis';
 import ResumeScorecard from './modules/ResumeScorecard';
 import JobRecommendations from './modules/JobRecommendations';
@@ -11,6 +12,9 @@ import ProgressTracker from './modules/ProgressTracker';
 import MentorConnect from './modules/MentorConnect';
 import AIAssistant from './modules/AIAssistant';
 import Settings from './modules/Settings';
+import StudentRequests from './modules/StudentRequests';
+import MySessions from './modules/MySessions';
+import Availability from './modules/Availability';
 
 export default function Dashboard({ onLogout }) {
   const [activeModule, setActiveModule] = useState('dashboard');
@@ -82,25 +86,42 @@ export default function Dashboard({ onLogout }) {
       );
     }
 
+    const role = typeof user?.role === 'string' ? user.role.toLowerCase() : 'student';
+    const isMentor = role === 'mentor';
+
     switch (activeModule) {
       case 'dashboard':
-        return <DashboardHome user={user} onNavigate={setActiveModule} />;
+        return isMentor ? (
+          <MentorDashboardHome user={user} onNavigate={setActiveModule} />
+        ) : (
+          <DashboardHome user={user} onNavigate={setActiveModule} />
+        );
+      case 'student-requests':
+        return isMentor ? <StudentRequests user={user} /> : <DashboardHome user={user} onNavigate={setActiveModule} />;
+      case 'my-sessions':
+        return isMentor ? <MySessions user={user} /> : <DashboardHome user={user} onNavigate={setActiveModule} />;
+      case 'availability':
+        return isMentor ? <Availability user={user} /> : <DashboardHome user={user} onNavigate={setActiveModule} />;
       case 'resume-analysis':
-        return <ResumeAnalysis user={user} onAnalysisComplete={fetchUserProfile} />;
+        return isMentor ? <MentorDashboardHome user={user} onNavigate={setActiveModule} /> : <ResumeAnalysis user={user} onAnalysisComplete={fetchUserProfile} />;
       case 'resume-scorecard':
-        return <ResumeScorecard user={user} />;
+        return isMentor ? <MentorDashboardHome user={user} onNavigate={setActiveModule} /> : <ResumeScorecard user={user} />;
       case 'job-recommendations':
-        return <JobRecommendations user={user} />;
+        return isMentor ? <MentorDashboardHome user={user} onNavigate={setActiveModule} /> : <JobRecommendations user={user} />;
       case 'progress-tracker':
-        return <ProgressTracker user={user} />;
+        return isMentor ? <MentorDashboardHome user={user} onNavigate={setActiveModule} /> : <ProgressTracker user={user} />;
       case 'mentor-connect':
-        return <MentorConnect user={user} />;
+        return isMentor ? <MentorDashboardHome user={user} onNavigate={setActiveModule} /> : <MentorConnect user={user} />;
       case 'ai-assistant':
-        return <AIAssistant user={user} />;
+        return isMentor ? <MentorDashboardHome user={user} onNavigate={setActiveModule} /> : <AIAssistant user={user} />;
       case 'settings':
         return <Settings user={user} />;
       default:
-        return <DashboardHome user={user} onNavigate={setActiveModule} />;
+        return isMentor ? (
+          <MentorDashboardHome user={user} onNavigate={setActiveModule} />
+        ) : (
+          <DashboardHome user={user} onNavigate={setActiveModule} />
+        );
     }
   };
 
