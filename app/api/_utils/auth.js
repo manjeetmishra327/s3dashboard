@@ -34,6 +34,16 @@ export function requireAuth(request) {
 
 export function requireRole(role) {
   const required = normalizeRole(role);
+  return (req, res, next) => {
+    if (!req.user || normalizeRole(req.user.role) !== required) {
+      return res.status(403).json({ message: 'Access denied' });
+    }
+    next();
+  };
+}
+
+export function requireRoleGuard(role) {
+  const required = normalizeRole(role);
   return (authUser) => {
     if (!authUser || normalizeRole(authUser.role) !== required) {
       return NextResponse.json({ message: 'Access denied' }, { status: 403 });

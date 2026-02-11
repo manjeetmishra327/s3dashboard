@@ -12,7 +12,8 @@ export default function AuthModal({ mode, onClose, onLogin, onModeChange }) {
     email: '',
     password: '',
     name: '',
-    phone: ''
+    phone: '',
+    role: 'student'
   });
 
   const handleInputChange = (e) => {
@@ -45,12 +46,27 @@ export default function AuthModal({ mode, onClose, onLogin, onModeChange }) {
       }
 
       if (mode === 'login') {
+        if (data?.token) {
+          localStorage.setItem('authToken', data.token);
+        }
+
+        const computedRedirectTo =
+          data?.redirectTo ||
+          (typeof data?.user?.role === 'string' && data.user.role.toLowerCase() === 'mentor'
+            ? '/mentor-dashboard'
+            : '/dashboard');
+
+        if (computedRedirectTo) {
+          window.location.assign(computedRedirectTo);
+          return;
+        }
+
         onLogin(data.token, data.user);
         onClose(); // Close the modal after successful login
       } else {
         // After successful signup, switch to login mode
         onModeChange('login');
-        setFormData({ email: '', password: '', name: '', phone: '' });
+        setFormData({ email: '', password: '', name: '', phone: '', role: 'student' });
         setError('');
       }
     } catch (err) {
@@ -97,6 +113,28 @@ export default function AuthModal({ mode, onClose, onLogin, onModeChange }) {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === 'signup' && (
               <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Role
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, role: 'student' })}
+                      className={`py-3 rounded-lg border text-sm font-medium transition-colors ${formData.role === 'student' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      Student
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setFormData({ ...formData, role: 'mentor' })}
+                      className={`py-3 rounded-lg border text-sm font-medium transition-colors ${formData.role === 'mentor' ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'}`}
+                    >
+                      Mentor
+                    </button>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Full Name
@@ -211,7 +249,7 @@ export default function AuthModal({ mode, onClose, onLogin, onModeChange }) {
               <button
                 onClick={() => {
                   onModeChange(mode === 'login' ? 'signup' : 'login');
-                  setFormData({ email: '', password: '', name: '', phone: '' });
+                  setFormData({ email: '', password: '', name: '', phone: '', role: 'student' });
                   setError('');
                 }}
                 className="ml-2 text-blue-600 hover:text-blue-700 font-medium"

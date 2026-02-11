@@ -106,7 +106,7 @@ export default function Dashboard({ onLogout }) {
 
   return (
     <div className="dashboard-container">
-      <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} />
+      <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} user={user} />
       <div className="main-content">
         <TopNavbar onLogout={onLogout} user={user} />
         <div className="content-area">

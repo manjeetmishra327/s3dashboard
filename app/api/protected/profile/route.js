@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { MongoClient, ObjectId } from 'mongodb';
 import jwt from 'jsonwebtoken';
-import { normalizeRole } from '../../api/_utils/auth';
+import { normalizeRole } from '../../_utils/auth';
 
 const uri = process.env.MONGODB_URI;
 const DB_NAME = process.env.MONGODB_DB;
