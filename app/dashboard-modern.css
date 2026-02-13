@@ -43,12 +43,10 @@
 
 /* Main Container with Layer 1 Background */
 .dashboard-home-modern {
-  min-height: 100vh;
   background: 
     radial-gradient(800px 400px at 30% 20%, rgba(139, 92, 246, 0.06) 0%, transparent 70%),
     radial-gradient(600px 300px at 70% 80%, rgba(139, 92, 246, 0.04) 0%, transparent 60%),
     linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-  padding: var(--spacing-xl);
   position: relative;
   overflow: hidden;
 }
@@ -60,9 +58,6 @@
 }
 
 .dashboard-home-modern .dashboard-container {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 120px 24px 80px 24px;
   display: block;
 }
 

@@ -54,7 +54,7 @@ export default function MentorDashboardHome({ user }) {
         <p className="page-tagline-modern">Welcome back, {firstName}. Stay on top of requests, schedule, and availability.</p>
       </motion.section>
 
-      <div className="stats-grid stats-row">
+      <div className="grid grid-cols-4 gap-6">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.title}

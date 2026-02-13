@@ -23,9 +23,7 @@ export default function RootLayout({ children }) {
         />
       </head>
       <body className={`${inter.className} antialiased`}>
-        <div className="page-transition">
-          {children}
-        </div>
+        <div className="page-transition">{children}</div>
       </body>
     </html>
   );

@@ -9,26 +9,24 @@ export default function MySessions() {
       { id: 's_1', student: 'Neha Sharma', topic: 'Mock Interview', when: 'Tomorrow · 6:00 PM', status: 'Scheduled' },
       { id: 's_2', student: 'Kabir Singh', topic: 'Career Roadmap', when: 'Fri · 5:30 PM', status: 'Scheduled' },
       { id: 's_3', student: 'Isha Verma', topic: 'Project Feedback', when: 'Sun · 11:00 AM', status: 'Scheduled' },
-      { id: 's_4', student: 'Aarav Mehta', topic: 'DSA Follow-up', when: 'Last week · 45 min', status: 'Completed' },
     ],
     []
   );
 
   return (
-    <div className="dashboard-home-modern">
-      <div className="dashboard-container">
+    <>
       <motion.section
         className="hero-section text-center mb-16"
-        initial={{ opacity: 0, y: -14 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
+        transition={{ duration: 0.6 }}
       >
         <div className="welcome-badge">
-          <i className="fas fa-calendar-check"></i>
-          <span>Schedule</span>
+          <i className="fas fa-video"></i>
+          <span>Meetings</span>
         </div>
         <h1 className="page-title-modern">My Sessions</h1>
-        <p className="page-subtitle-modern">Track upcoming sessions and review recent outcomes</p>
+        <p className="page-subtitle-modern">View and manage your upcoming mentorship sessions</p>
       </motion.section>
 
       <div className="dashboard-content-modern">
@@ -42,68 +40,42 @@ export default function MySessions() {
           >
             <div className="card-header-modern">
               <h2 className="card-title-modern">
-                <i className="fas fa-video"></i>
-                Upcoming
-              </h2>
-            </div>
-
-            <div className="insights-list">
-              {sessions
-                .filter((s) => s.status === 'Scheduled')
-                .slice(0, 3)
-                .map((s) => (
-                  <div key={s.id} className="insight-item">
-                    <div className="insight-icon">
-                      <i className="fas fa-user" style={{ color: '#a5b4fc' }}></i>
-                    </div>
-                    <div className="insight-content">
-                      <div className="insight-text">
-                        <strong>{s.student}</strong> · {s.topic}
-                      </div>
-                      <div className="insight-time">{s.when}</div>
-                    </div>
-                    <span className="impact-pill">Scheduled</span>
-                  </div>
-                ))}
-            </div>
-
-            <button className="btn-primary" style={{ width: '100%', marginTop: 14 }}>
-              <i className="fas fa-calendar-plus"></i>
-              Create Session
-            </button>
-          </motion.div>
-
-          <motion.div
-            className="content-card-modern card-premium p-6"
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, delay: 0.18 }}
-            whileHover={{ y: -2, transition: { duration: 0.2 } }}
-          >
-            <div className="card-header-modern">
-              <h2 className="card-title-modern">
-                <i className="fas fa-check-circle"></i>
-                Completed
+                <i className="fas fa-calendar-check"></i>
+                Upcoming Sessions
               </h2>
             </div>
 
             <div className="activities-list">
-              {sessions
-                .filter((s) => s.status === 'Completed')
-                .slice(0, 2)
-                .map((s) => (
-                  <div key={s.id} className="activity-item">
-                    <div className="activity-icon resume">
-                      <i className="fas fa-award"></i>
+              {sessions.length === 0 ? (
+                <div className="empty-state-modern">
+                  <i className="fas fa-calendar"></i>
+                  <p>No sessions scheduled</p>
+                  <p className="text-sm text-gray-400">Your upcoming mentorship sessions will appear here</p>
+                </div>
+              ) : (
+                sessions.map((session, index) => (
+                  <motion.div
+                    key={session.id}
+                    className="activity-item-modern"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                  >
+                    <div className="activity-avatar-modern">
+                      {session.student.split(' ').map(n => n[0]).join('')}
                     </div>
-                    <div className="activity-content">
-                      <div className="activity-text">
-                        <strong>{s.student}</strong> · {s.topic}
-                      </div>
-                      <div className="activity-time">{s.when}</div>
+                    <div className="activity-details-modern">
+                      <div className="activity-name-modern">{session.student}</div>
+                      <div className="activity-desc-modern">{session.topic}</div>
+                      <div className="activity-time-modern">{session.when}</div>
                     </div>
-                  </div>
-                ))}
+                    <div className="activity-actions-modern">
+                      <button className="btn-primary btn-sm">Join</button>
+                      <button className="btn-secondary btn-sm">Details</button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </motion.div>
         </div>
@@ -113,7 +85,7 @@ export default function MySessions() {
             className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, delay: 0.14 }}
+            transition={{ duration: 0.45, delay: 0.18 }}
             whileHover={{ y: -2, transition: { duration: 0.2 } }}
           >
             <div className="card-header-modern" style={{ alignItems: 'flex-start' }}>
@@ -138,7 +110,6 @@ export default function MySessions() {
           </motion.div>
         </div>
       </div>
-      </div>
-    </div>
+    </>
   );
 }

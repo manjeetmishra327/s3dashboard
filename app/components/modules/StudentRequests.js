@@ -15,13 +15,12 @@ export default function StudentRequests() {
   );
 
   return (
-    <div className="dashboard-home-modern">
-      <div className="dashboard-container">
+    <>
       <motion.section
         className="hero-section text-center mb-16"
-        initial={{ opacity: 0, y: -14 }}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45 }}
+        transition={{ duration: 0.6 }}
       >
         <div className="welcome-badge">
           <i className="fas fa-user-plus"></i>
@@ -48,27 +47,36 @@ export default function StudentRequests() {
             </div>
 
             <div className="activities-list">
-              {requests.map((req) => (
-                <div key={req.id} className="activity-item">
-                  <div className="activity-icon welcome">
-                    <i className="fas fa-user"></i>
-                  </div>
-                  <div className="activity-content">
-                    <div className="activity-text">
-                      <strong>{req.name}</strong> · {req.topic}
-                    </div>
-                    <div className="activity-time">Requested {req.date}</div>
-                    <div style={{ display: 'flex', gap: 10, marginTop: 10, flexWrap: 'wrap' }}>
-                      <button className="btn-primary" style={{ padding: '10px 12px', transition: 'all 200ms ease' }}>
-                        Accept
-                      </button>
-                      <button className="btn-secondary" style={{ padding: '10px 12px', transition: 'all 200ms ease' }}>
-                        Decline
-                      </button>
-                    </div>
-                  </div>
+              {requests.length === 0 ? (
+                <div className="empty-state-modern">
+                  <i className="fas fa-inbox"></i>
+                  <p>No student requests yet</p>
+                  <p className="text-sm text-gray-400">Requests will appear here when students reach out</p>
                 </div>
-              ))}
+              ) : (
+                requests.map((request, index) => (
+                  <motion.div
+                    key={request.id}
+                    className="activity-item-modern"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 + index * 0.05 }}
+                  >
+                    <div className="activity-avatar-modern">
+                      {request.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div className="activity-details-modern">
+                      <div className="activity-name-modern">{request.name}</div>
+                      <div className="activity-desc-modern">{request.topic}</div>
+                      <div className="activity-time-modern">{request.date}</div>
+                    </div>
+                    <div className="activity-actions-modern">
+                      <button className="btn-primary btn-sm">Accept</button>
+                      <button className="btn-secondary btn-sm">View</button>
+                    </div>
+                  </motion.div>
+                ))
+              )}
             </div>
           </motion.div>
         </div>
@@ -78,32 +86,30 @@ export default function StudentRequests() {
             className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.45, delay: 0.16 }}
+            transition={{ duration: 0.45, delay: 0.18 }}
             whileHover={{ y: -2, transition: { duration: 0.2 } }}
           >
-            <div className="card-header-modern" style={{ alignItems: 'flex-start' }}>
-              <div>
-                <h2 className="card-title-modern">
-                  <i className="fas fa-filter"></i>
-                  Triage
-                </h2>
-                <div className="card-header-subtle">Keep your queue healthy and respond quickly</div>
-              </div>
+            <div className="card-header-modern">
+              <h2 className="card-title-modern">
+                <i className="fas fa-lightbulb"></i>
+                Quick Tips
+              </h2>
             </div>
-            <div className="insights-list">
-              <div className="insight-item">
-                <div className="insight-content">
-                  <div className="insight-text">
-                    <strong>Tip</strong>
+            <div className="card-content-modern">
+              <div className="insights-list">
+                <div className="insight-item">
+                  <div className="insight-content">
+                    <div className="insight-text">
+                      <strong>Tip</strong>
+                    </div>
+                    <div className="insight-time">Accept requests that match your strongest topics to maximize impact.</div>
                   </div>
-                  <div className="insight-time">Accept requests that match your strongest topics to maximize impact.</div>
                 </div>
               </div>
             </div>
           </motion.div>
         </div>
       </div>
-      </div>
-    </div>
+    </>
   );
 }
