@@ -31,12 +31,12 @@ const JobCard = ({ job, isTop }) => {
   const overlapBadges = overlapItems.slice(0, 3);
 
   return (
-    <Card className={`group overflow-hidden transition-all duration-300 ease-out bg-[var(--card-bg)] border-[var(--card-border)] hover:bg-[var(--elevated-bg)] hover:border-[var(--elevated-border)] hover:shadow-[var(--shadow-soft)] hover:-translate-y-0.5 ${isTop ? 'ring-1 ring-[var(--accent-primary)]/20 shadow-[var(--shadow-soft)]' : ''}`}>
+    <Card className={`card-premium p-6 group overflow-hidden transition-all duration-300 ease-out ${isTop ? 'ring-1 ring-white/10' : ''}`}>
       <CardContent className="p-5">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="min-w-0 md:flex-[1.35]">
             <div className="flex items-start gap-3">
-              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] bg-white/5 border border-white/10 text-white/70">
+              <div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-[var(--radius-md)] border border-[var(--border-subtle)] text-white/70">
                 <Briefcase className="h-4 w-4" />
               </div>
               <div className="min-w-0">
@@ -68,7 +68,7 @@ const JobCard = ({ job, isTop }) => {
             {overlapBadges.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {overlapBadges.map((b, idx) => (
-                  <Badge key={idx} variant="secondary" className="bg-white/5 border border-white/10 text-white/70">
+                  <Badge key={idx} variant="secondary" className="bg-[var(--bg-card)] border border-[var(--border-subtle)] text-white/70">
                     {String(b).slice(0, 36)}
                   </Badge>
                 ))}
@@ -87,7 +87,7 @@ const JobCard = ({ job, isTop }) => {
               >
                 <a href={job.apply_link} target="_blank" rel="noopener noreferrer">Apply</a>
               </Button>
-              <Button asChild variant="outline" size="sm" className="border-white/10 bg-white/5 text-white/80 hover:bg-white/10">
+              <Button asChild variant="outline" size="sm" className="border-[var(--border-subtle)] bg-[var(--bg-card)] text-white/80 hover:bg-white/10">
                 <a href={job.apply_link} target="_blank" rel="noopener noreferrer">View</a>
               </Button>
             </div>
@@ -189,20 +189,20 @@ export default function JobRecommendations() {
   };
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-[linear-gradient(180deg,var(--bg-primary)_0%,var(--bg-secondary)_100%)]">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="max-w-screen-xl mx-auto">
-        <header className="p-6 mb-8 bg-[var(--elevated-bg)] border border-[var(--elevated-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-white/5">
+        <header className="p-6 mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h1 className="text-2xl md:text-3xl font-semibold text-white/95">AI Matched Jobs</h1>
               <p className="mt-1 text-sm md:text-base text-white/60">Based on your resume analysis and semantic similarity</p>
             </div>
             <div className="flex items-center gap-3 sm:justify-end">
-              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/12 bg-white/8">
+              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
                 <div className="text-[11px] uppercase tracking-wide text-white/45">Match quality</div>
                 <div className="mt-0.5 text-sm font-semibold text-white/85">{matchQuality}</div>
               </div>
-              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/12 bg-white/8">
+              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
                 <div className="text-[11px] uppercase tracking-wide text-white/45">Jobs found</div>
                 <div className="mt-0.5 text-sm font-semibold text-white/85">{sortedJobs.length}</div>
               </div>
@@ -240,7 +240,7 @@ export default function JobRecommendations() {
             </>
           )}
           {!loading && !error && jobs.length === 0 && (
-            <div className="py-16 text-center bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] rounded-[var(--radius-lg)]">
+            <div className="card-premium p-6 py-16 text-center">
               <h3 className="text-xl font-semibold text-white/90">No strong matches found</h3>
               <p className="mt-2 text-white/55">Try improving your resume score, then re-run matching for better semantic alignment.</p>
             </div>
@@ -249,10 +249,10 @@ export default function JobRecommendations() {
 
         
         {error && (
-          <div className="py-16 text-center bg-red-50 border border-dashed rounded-lg border-red-300 dark:bg-red-900/20 dark:border-red-700">
+          <div className="py-16 text-center bg-red-500/10 border border-dashed rounded-lg border-red-500/30">
             <Zap className="w-12 h-12 mx-auto mb-4 text-red-500" />
-            <h3 className="text-xl font-semibold text-red-800 dark:text-red-200">An Error Occurred</h3>
-            <p className="mt-2 text-red-600 dark:text-red-300">{error}</p>
+            <h3 className="text-xl font-semibold text-red-200">An Error Occurred</h3>
+            <p className="mt-2 text-red-300">{error}</p>
           </div>
         )}
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { motion } from 'framer-motion';
 
 export default function MentorConnect() {
   const [mentors, setMentors] = useState([]);
@@ -102,9 +103,9 @@ export default function MentorConnect() {
   }, [bestMatch]);
 
   return (
-    <div className="min-h-screen p-4 sm:p-6 lg:p-8 bg-[linear-gradient(180deg,var(--bg-primary)_0%,var(--bg-secondary)_100%)]">
+    <div className="min-h-screen p-4 sm:p-6 lg:p-8">
       <div className="max-w-screen-xl mx-auto">
-        <header className="p-6 mb-8 bg-[var(--elevated-bg)] border border-[var(--elevated-border)] rounded-[var(--radius-lg)] shadow-[var(--shadow-soft)] ring-1 ring-white/5">
+        <header className="p-6 mb-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div className="min-w-0">
               <h1 className="text-2xl md:text-3xl font-semibold text-white/95">Mentor Connect</h1>
@@ -118,7 +119,7 @@ export default function MentorConnect() {
                   <div className="mt-0.5 text-sm font-semibold text-[var(--accent-primary)]">{bestMatch?.name}</div>
                 </div>
               ) : null}
-              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-white/12 bg-white/8">
+              <div className="px-3 py-2 rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-card)]">
                 <div className="text-[11px] uppercase tracking-wide text-white/45">Mentors</div>
                 <div className="mt-0.5 text-sm font-semibold text-white/85">{mentorsLoading ? '—' : sortedMentors.length}</div>
               </div>
@@ -128,7 +129,7 @@ export default function MentorConnect() {
 
         <main>
           <div className="grid grid-cols-1 gap-4 mb-6">
-            <div className="bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-subtle)]">
+            <div className="card-premium p-5">
               <div className="flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <h2 className="text-base md:text-lg font-semibold text-white/90">My Mentor Requests</h2>
@@ -187,21 +188,26 @@ export default function MentorConnect() {
           {mentorsLoading ? (
             <div className="grid grid-cols-1 gap-4">
               {[...Array(3)].map((_, i) => (
-                <div key={i} className="h-[118px] rounded-[var(--radius-lg)] border border-[var(--card-border)] bg-[var(--card-bg)]"></div>
+                <div key={i} className="h-[118px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-card)]"></div>
               ))}
             </div>
           ) : mentorsError ? (
-            <div className="py-10 text-center bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] rounded-[var(--radius-lg)]">
+            <div className="py-10 text-center bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-lg)]">
               <h3 className="text-xl font-semibold text-white/90">Unable to load mentors</h3>
               <p className="mt-2 text-white/55">{mentorsError}</p>
             </div>
           ) : sortedMentors.length === 0 ? (
-            <div className="py-16 text-center bg-[var(--card-bg)] border border-dashed border-[var(--card-border)] rounded-[var(--radius-lg)]">
+            <div className="py-16 text-center bg-[var(--bg-card)] border border-dashed border-[var(--border-subtle)] rounded-[var(--radius-lg)]">
               <h3 className="text-xl font-semibold text-white/90">No mentors available right now</h3>
               <p className="mt-2 text-white/55">Try again later.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4">
+            <motion.div
+              className="grid grid-cols-1 gap-4"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+            >
               {sortedMentors.map((mentor, idx) => {
                 const mentorId = mentorIdOf(mentor);
                 const connectState = connectStateByMentorId?.[mentorId] || { status: 'idle', error: '' };
@@ -277,9 +283,13 @@ export default function MentorConnect() {
                 };
 
                 return (
-                  <div
+                  <motion.div
                     key={mentorId}
-                    className={`group bg-[var(--card-bg)] border border-[var(--card-border)] rounded-[var(--radius-lg)] p-5 shadow-[var(--shadow-subtle)] transition-all duration-200 ease-out hover:bg-[var(--elevated-bg)] hover:border-[var(--elevated-border)] hover:shadow-[var(--shadow-soft)] hover:-translate-y-0.5 ${idx === 0 ? 'ring-1 ring-[var(--accent-primary)]/15' : ''}`}
+                    className={`card-premium p-5 ${idx === 0 ? 'ring-1 ring-white/10' : ''}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1], delay: idx * 0.04 }}
+                    whileHover={{ y: -4, transition: { duration: 0.2 } }}
                   >
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="min-w-0 md:flex-[1.2]">
@@ -362,10 +372,10 @@ export default function MentorConnect() {
                         <div className="text-sm text-white/60">{connectState.error}</div>
                       ) : null}
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
-            </div>
+            </motion.div>
           )}
         </main>
       </div>

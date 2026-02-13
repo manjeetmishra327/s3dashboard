@@ -22,8 +22,10 @@ export default function RootLayout({ children }) {
           referrerPolicy="no-referrer"
         />
       </head>
-      <body className={`${inter.className} antialiased bg-gray-50`}>
-        {children}
+      <body className={`${inter.className} antialiased`}>
+        <div className="page-transition">
+          {children}
+        </div>
       </body>
     </html>
   );

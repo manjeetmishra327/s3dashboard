@@ -16,12 +16,6 @@ export default function StudentRequests() {
 
   return (
     <div className="dashboard-home-modern">
-      <div className="dashboard-modern-bg">
-        <div className="gradient-orb orb-1"></div>
-        <div className="gradient-orb orb-2"></div>
-        <div className="gradient-orb orb-3"></div>
-      </div>
-
       <motion.div
         className="hero-section-modern"
         initial={{ opacity: 0, y: -14 }}
@@ -39,7 +33,7 @@ export default function StudentRequests() {
       <div className="dashboard-content-modern">
         <div className="dashboard-section-modern">
           <motion.div
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.45, delay: 0.12 }}
@@ -80,7 +74,7 @@ export default function StudentRequests() {
 
         <div className="dashboard-section-modern">
           <motion.div
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.45, delay: 0.16 }}

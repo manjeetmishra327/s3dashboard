@@ -53,6 +53,41 @@
   overflow: hidden;
 }
 
+.dashboard-shell {
+  display: flex;
+  min-height: 100vh;
+  background: transparent;
+}
+
+.dashboard-home-modern .dashboard-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 120px 24px 80px 24px;
+  display: block;
+}
+
+.hero-section {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+}
+
+.card-premium {
+  background: rgba(20,25,45,0.65);
+  backdrop-filter: blur(18px);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 18px;
+  padding: 28px;
+  transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.03);
+}
+
 .dashboard-home-modern::after {
   content: '';
   position: absolute;
@@ -530,25 +565,27 @@
 
 /* Resume Score - Primary Hero Enhancement */
 .stat-card-modern {
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 /* Resume Score - Primary Hero Enhancement */
 .stat-card-modern.primary {
-  background: var(--elevated-bg);
-  border-color: var(--accent-primary);
-  box-shadow: var(--shadow-elevated);
-  padding: var(--spacing-xl);
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   transform: scale(1.05);
   position: relative;
+  box-shadow: none;
 }
 
 .stat-card-modern.primary::after {
@@ -560,6 +597,7 @@
   opacity: 1;
   border-radius: var(--radius-lg);
   z-index: -1;
+  display: none;
 }
 
 .stat-value-modern {
@@ -587,6 +625,7 @@
   background: var(--card-border);
   border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   transition: opacity 0.3s ease;
+  display: none;
 }
 
 .stat-card-modern.primary::before {
@@ -598,9 +637,9 @@
 }
 
 .stat-card-modern:hover {
-  background: var(--elevated-bg);
-  border-color: var(--elevated-border);
-  box-shadow: var(--shadow-soft);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
   transform: translateY(-1px);
 }
 
@@ -710,35 +749,35 @@
 
 /* Layer 2 - Content Cards */
 .content-card-modern {
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   transition: all 0.3s ease;
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .content-card-modern:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
+  box-shadow: none;
 }
 
 /* Glass Card Dark - Layer 2 */
 .glass-card-dark {
-  background: var(--card-bg);
-  backdrop-filter: blur(20px);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  background: transparent;
+  backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .glass-card-dark:hover {
-  background: var(--elevated-bg);
-  border-color: var(--elevated-border);
-  box-shadow: var(--shadow-soft);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
   transform: translateY(-2px);
 }
 
@@ -873,18 +912,18 @@
   align-items: flex-start;
   gap: var(--spacing-md);
   padding: var(--spacing-md);
-  border: 1px solid var(--card-border);
-  border-radius: var(--radius-md);
+  border: none;
+  border-radius: 0;
   transition: all 0.3s ease;
-  background: var(--card-bg);
+  background: transparent;
   position: relative;
 }
 
 .insight-item:hover {
-  background: var(--elevated-bg);
-  border-color: var(--elevated-border);
+  background: transparent;
+  border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: var(--shadow-subtle);
+  box-shadow: none;
 }
 
 .insight-content {

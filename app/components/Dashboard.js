@@ -125,15 +125,20 @@ export default function Dashboard({ onLogout }) {
     }
   };
 
+  const homeModules = new Set(['dashboard', 'student-requests', 'my-sessions', 'availability']);
+  const contentAreaClassName = homeModules.has(activeModule)
+    ? 'content-area'
+    : 'content-area max-w-[1200px] mx-auto px-6 py-8';
+
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-shell">
       <Sidebar activeModule={activeModule} onModuleChange={setActiveModule} user={user} />
-      <div className="main-content">
+      <div className="main-content app-surface">
         <TopNavbar onLogout={onLogout} user={user} />
-        <div className="content-area">
+        <div className={contentAreaClassName}>
           {renderModule()}
         </div>
       </div>
     </div>
   );
-} 
+}

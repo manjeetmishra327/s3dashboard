@@ -689,7 +689,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
       className={`relative p-12 border-2 border-dashed rounded-2xl transition-all duration-300 ${
         dragActive 
           ? 'border-indigo-400 bg-indigo-500/10 scale-[1.02]' 
-          : 'border-white/20 hover:border-indigo-400/50 bg-white/5'
+          : 'border-white/20 hover:border-indigo-400/50 bg-[var(--bg-card)]'
       }`}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -741,7 +741,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
 
       {isUploading && (
         <motion.div 
-          className="relative mt-8 p-4 bg-white/5 backdrop-blur-sm rounded-xl border border-white/10"
+          className="relative mt-8 p-4 bg-[var(--bg-card)] backdrop-blur-sm rounded-xl border border-[var(--border-subtle)]"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
@@ -789,13 +789,13 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
         transition={{ duration: 0.5 }}
         className="mt-8"
       >
-        <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 p-8"
+        <div className="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl shadow-2xl border border-[var(--border-subtle)] p-8"
           style={{
             boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(129, 140, 248, 0.15)'
           }}
         >
           {/* Header */}
-          <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
+          <div className="flex items-center justify-between mb-6 border-b border-[var(--border-subtle)] pb-4">
             <div className="flex items-center gap-3">
               <div className="p-3 bg-gradient-to-br from-indigo-500/20 to-purple-500/20 rounded-xl border border-indigo-500/30">
                 <Eye className="h-6 w-6 text-indigo-400" />
@@ -814,7 +814,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
           </div>
 
           {/* Resume Content */}
-          <div className="space-y-6 bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-white/10">
+          <div className="space-y-6 bg-gradient-to-br from-white/5 to-white/10 rounded-xl p-6 border border-[var(--border-subtle)]">
             
             {/* Contact Section */}
             {(data.contact?.emails?.length > 0 || data.contact?.phones?.length > 0) && (
@@ -823,7 +823,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                   <div className="w-1 h-6 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-full"></div>
                   Contact Information
                 </h3>
-                <div className="bg-white/5 rounded-lg p-4 space-y-2">
+                <div className="bg-[var(--bg-card)] rounded-lg p-4 space-y-2">
                   {data.contact.emails?.map((email, index) => (
                     <div key={index} className="flex items-center gap-2">
                       <span className="text-indigo-400 text-sm">📧</span>
@@ -847,7 +847,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                   <div className="w-1 h-6 bg-gradient-to-b from-emerald-500 to-teal-500 rounded-full"></div>
                   Technical Skills
                 </h3>
-                <div className="bg-white/5 rounded-lg p-4">
+                <div className="bg-[var(--bg-card)] rounded-lg p-4">
                   <div className="flex flex-wrap gap-2">
                     {data.skills.map((skill, index) => (
                       <span
@@ -874,7 +874,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 </h3>
                 <div className="space-y-3">
                   {data.experience.map((exp, index) => (
-                    <div key={index} className="bg-white/5 rounded-lg p-4 border-l-2 border-blue-500">
+                    <div key={index} className="bg-[var(--bg-card)] rounded-lg p-4 border-l-2 border-blue-500">
                       <p className="text-gray-200 text-sm leading-relaxed">{exp}</p>
                     </div>
                   ))}
@@ -894,7 +894,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 </h3>
                 <div className="space-y-3">
                   {data.projects.map((project, index) => (
-                    <div key={index} className="bg-white/5 rounded-lg p-4 border-l-2 border-amber-500">
+                    <div key={index} className="bg-[var(--bg-card)] rounded-lg p-4 border-l-2 border-amber-500">
                       <p className="text-gray-200 text-sm leading-relaxed">{project}</p>
                     </div>
                   ))}
@@ -914,7 +914,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 </h3>
                 <div className="space-y-3">
                   {data.education.map((edu, index) => (
-                    <div key={index} className="bg-white/5 rounded-lg p-4 border-l-2 border-purple-500">
+                    <div key={index} className="bg-[var(--bg-card)] rounded-lg p-4 border-l-2 border-purple-500">
                       <p className="text-gray-200 text-sm leading-relaxed">{edu}</p>
                     </div>
                   ))}
@@ -926,7 +926,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
             )}
 
             {/* Stats Footer */}
-            <div className="border-t border-white/10 pt-4 mt-6">
+            <div className="border-t border-[var(--border-subtle)] pt-4 mt-6">
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
                 <div className="text-center">
                   <div className="text-2xl font-bold text-indigo-400">{data.skills?.length || 0}</div>
@@ -968,7 +968,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
         key="analysis-results"
       >
         <motion.div 
-          className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-white/10 overflow-hidden w-full"
+          className="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl shadow-2xl p-6 border border-[var(--border-subtle)] overflow-hidden w-full"
           variants={fadeIn}
           layoutId="analysisCard"
           style={{
@@ -1069,7 +1069,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                   <motion.div variants={itemFadeIn}>
                     <h3 className="text-lg font-semibold text-white mb-3">Resume Summary</h3>
                     <div className="space-y-3">
-                      <div className="flex items-start bg-white/5 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                      <div className="flex items-start bg-[var(--bg-card)] backdrop-blur-sm p-3 rounded-lg border border-[var(--border-subtle)]">
                         <CheckCircle className="h-5 w-5 text-green-400 mr-3 mt-0.5 flex-shrink-0" />
                         <p className="text-sm text-gray-300">
                           Resume parsed successfully! {analysisResults.extractedData?.skills?.length || 0} skills detected.
@@ -1099,7 +1099,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       {Object.entries(aiAnalysis.score_breakdown).map(([key, value]) => (
-                        <div key={key} className="bg-white/5 backdrop-blur-sm rounded-lg p-3 border border-white/10">
+                        <div key={key} className="bg-[var(--bg-card)] backdrop-blur-sm rounded-lg p-3 border border-[var(--border-subtle)]">
                           <div className="flex justify-between items-center mb-2">
                             <span className="text-sm font-medium text-gray-300 capitalize">
                               {key.replace(/_/g, ' ')}
@@ -1163,11 +1163,12 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                     </h3>
                     <div className="space-y-4">
                       {aiAnalysis.suggestions.map((suggestion, index) => (
-                        <div key={index} className="bg-white/5 backdrop-blur-sm rounded-lg p-4 border-l-4 border-blue-400">
+                        <div key={index} className="bg-[var(--bg-card)] backdrop-blur-sm rounded-lg p-4 border-l-4 border-blue-400">
                           <div className="flex items-start justify-between mb-2">
                             <span className="text-xs font-semibold text-blue-400 uppercase">{suggestion.category}</span>
                             <span className={`text-xs px-2 py-1 rounded-full ${
-                              suggestion.priority === 'high' ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
+                              suggestion.priority === 'High'
+                                ? 'bg-red-500/20 text-red-300 border border-red-500/30' :
                               suggestion.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-300 border border-yellow-500/30' :
                               'bg-green-500/20 text-green-300 border border-green-500/30'
                             }`}>
@@ -1241,7 +1242,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 <h3 className="text-lg font-semibold text-white mb-3">Work Experience</h3>
                 <div className="space-y-2">
                   {analysisResults.extractedData.experience.map((exp, index) => (
-                    <div key={index} className="flex items-start bg-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                    <div key={index} className="flex items-start bg-[var(--bg-card)] backdrop-blur-sm p-4 rounded-lg border border-[var(--border-subtle)]">
                       <FileText className="h-4 w-4 text-indigo-400 mt-1 mr-3 flex-shrink-0" />
                       <p className="text-sm text-gray-300 break-words whitespace-normal flex-1">{exp}</p>
                     </div>
@@ -1256,7 +1257,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 <h3 className="text-lg font-semibold text-white mb-3">Projects</h3>
                 <div className="space-y-2">
                   {analysisResults.extractedData.projects.map((project, index) => (
-                    <div key={index} className="flex items-start bg-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                    <div key={index} className="flex items-start bg-[var(--bg-card)] backdrop-blur-sm p-4 rounded-lg border border-[var(--border-subtle)]">
                       <Zap className="h-4 w-4 text-amber-400 mt-1 mr-3 flex-shrink-0" />
                       <p className="text-sm text-gray-300 break-words whitespace-normal flex-1">{project}</p>
                     </div>
@@ -1271,7 +1272,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 <h3 className="text-lg font-semibold text-white mb-3">Education</h3>
                 <div className="space-y-2">
                   {analysisResults.extractedData.education.map((edu, index) => (
-                    <div key={index} className="flex items-start bg-white/5 backdrop-blur-sm p-4 rounded-lg border border-white/10">
+                    <div key={index} className="flex items-start bg-[var(--bg-card)] backdrop-blur-sm p-4 rounded-lg border border-[var(--border-subtle)]">
                       <BarChart className="h-4 w-4 text-purple-400 mt-1 mr-3 flex-shrink-0" />
                       <p className="text-sm text-gray-300 break-words whitespace-normal flex-1">{edu}</p>
                     </div>
@@ -1286,13 +1287,13 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 <h3 className="text-lg font-semibold text-white mb-3">Contact Information</h3>
                 <div className="space-y-2">
                   {analysisResults.extractedData.contact.emails?.map((email, index) => (
-                    <div key={`email-${index}`} className="flex items-start text-sm bg-white/5 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                    <div key={`email-${index}`} className="flex items-start text-sm bg-[var(--bg-card)] backdrop-blur-sm p-3 rounded-lg border border-[var(--border-subtle)]">
                       <span className="font-semibold text-indigo-400 mr-2 flex-shrink-0">Email:</span>
                       <span className="text-gray-300 break-all flex-1">{email}</span>
                     </div>
                   ))}
                   {analysisResults.extractedData.contact.phones?.map((phone, index) => (
-                    <div key={`phone-${index}`} className="flex items-start text-sm bg-white/5 backdrop-blur-sm p-3 rounded-lg border border-white/10">
+                    <div key={`phone-${index}`} className="flex items-start text-sm bg-[var(--bg-card)] backdrop-blur-sm p-3 rounded-lg border border-[var(--border-subtle)]">
                       <span className="font-semibold text-indigo-400 mr-2 flex-shrink-0">Phone:</span>
                       <span className="text-gray-300 break-all flex-1">{phone}</span>
                     </div>
@@ -1340,7 +1341,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.2 }}
-        className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10"
+        className="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-[var(--border-subtle)]"
         style={{
           boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(102, 126, 234, 0.15)'
         }}
@@ -1414,7 +1415,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
           transition={{ duration: 0.5, delay: 0.35 }}
           className="mt-8"
         >
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10 p-6"
+          <div className="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-[var(--border-subtle)] p-6"
             style={{ boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(129, 140, 248, 0.15)' }}
           >
             <div className="flex items-center justify-between mb-4">
@@ -1428,7 +1429,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
                 </div>
               </div>
             </div>
-            <div className="rounded-lg overflow-hidden border border-white/10 bg-black/20">
+            <div className="rounded-lg overflow-hidden border border-[var(--border-subtle)] bg-[var(--bg-section)]">
               <embed src={`${pdfUrl}#toolbar=1&navpanes=0&scrollbar=1`} type="application/pdf" width="100%" height="800px" />
             </div>
           </div>
@@ -1443,7 +1444,7 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
           transition={{ duration: 0.5, delay: 0.4 }}
           className="mt-8"
         >
-          <div className="bg-white/5 backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-white/10 p-6 sm:p-10"
+          <div className="bg-[var(--bg-card)] backdrop-blur-xl rounded-2xl shadow-2xl overflow-hidden border border-[var(--border-subtle)] p-6 sm:p-10"
             style={{
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), 0 8px 20px rgba(16, 185, 129, 0.15)'
             }}

@@ -398,15 +398,9 @@ export default function DashboardHome({ user, onNavigate }) {
 
   return (
     <div className="dashboard-home-modern">
-      {/* Modern Dark Gradient Background */}
-      <div className="dashboard-modern-bg">
-        <div className="gradient-orb orb-1"></div>
-        <div className="gradient-orb orb-2"></div>
-        <div className="gradient-orb orb-3"></div>
-      </div>
-
-      <motion.div 
-        className="hero-section-modern"
+      <div className="dashboard-container">
+      <motion.section 
+        className="hero-section text-center mb-16"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -418,14 +412,14 @@ export default function DashboardHome({ user, onNavigate }) {
         <h1 className="page-title-modern">Welcome back, {firstName}</h1>
         <p className="page-subtitle-modern">Track your resume progress and get AI-powered insights</p>
         <p className="page-tagline-modern">Upload resumes, analyze scores, and optimize for ATS success</p>
-      </motion.div>
+      </motion.section>
 
       {/* Stats Overview - Modern Cards */}
-      <div className="stats-overview-modern">
+      <div className="stats-grid">
         {stats.map((stat, index) => (
           <motion.div 
             key={index} 
-            className={`stat-card-modern glass-card ${stat.title === 'Resume Score' ? 'primary' : 'secondary'}`}
+            className={`stat-card-modern card-premium p-6 flex flex-col justify-between ${stat.title === 'Resume Score' ? 'primary' : 'secondary'}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -457,7 +451,7 @@ export default function DashboardHome({ user, onNavigate }) {
         <div className="dashboard-section-modern">
         {/* Recent Activities */}
         <motion.div 
-          className="content-card-modern glass-card-dark"
+          className="content-card-modern card-premium p-6"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.4 }}
@@ -502,7 +496,7 @@ export default function DashboardHome({ user, onNavigate }) {
 
           {/* ATS Result Card */}
         <motion.div 
-          className="content-card-modern glass-card-dark"
+          className="content-card-modern card-premium p-6"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
@@ -555,7 +549,7 @@ export default function DashboardHome({ user, onNavigate }) {
         {/* Progress Over Time - Line Chart */}
         {progressChart && (
           <motion.div 
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.62 }}
@@ -575,7 +569,7 @@ export default function DashboardHome({ user, onNavigate }) {
           {/* Last Analysis Details - NEW SECTION */}
           {lastAnalysis && chartData && (
             <motion.div 
-              className="content-card-modern glass-card-dark"
+              className="content-card-modern card-premium p-6"
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.6, delay: 0.6 }}
@@ -713,7 +707,7 @@ export default function DashboardHome({ user, onNavigate }) {
         <div className="dashboard-section-modern">
           {/* Upload New Resume */}
           <motion.div 
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.35 }}
@@ -744,7 +738,7 @@ export default function DashboardHome({ user, onNavigate }) {
 
           {/* Next Best Action */}
           <motion.div 
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.42 }}
@@ -776,7 +770,7 @@ export default function DashboardHome({ user, onNavigate }) {
 
           {/* Resume Strength Analyzer */}
           <motion.div 
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
@@ -870,75 +864,83 @@ export default function DashboardHome({ user, onNavigate }) {
       </motion.div>
 
       {/* AI Suggestions */}
-          <motion.div 
-            className="content-card-modern glass-card-dark"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-          >
-            <div className="card-header-modern">
-              <div>
-                <h2 className="card-title-modern">
-                  <i className="fas fa-lightbulb"></i>
-                  AI Suggestions
-                </h2>
-                <div className="card-header-subtle">Prioritized by estimated impact</div>
+      <motion.div 
+        className="content-card-modern card-premium p-6"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.5 }}
+      >
+        <div className="card-header-modern">
+          <div>
+            <h2 className="card-title-modern">
+              <i className="fas fa-lightbulb"></i>
+              AI Suggestions
+            </h2>
+            <div className="card-header-subtle">Prioritized by estimated impact</div>
+          </div>
+          <span className="ai-badge"><i className="fas fa-robot"></i>Live</span>
+        </div>
+        <div className="insights-list">
+          {aiTipsSorted && aiTipsSorted.length > 0 ? (
+            aiTipsSorted.slice(0, 3).map((tip, idx) => (
+              <div key={idx} className={`insight-item ${idx === 0 ? 'ai-recommended' : ''}`}>
+                <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
+                <div className="insight-content">
+                  <div className="insight-text">
+                    <strong>{tip.title || `Tip ${idx + 1}`}</strong>
+                    {idx === 0 ? (
+                      <span className="ai-badge" style={{ marginLeft: '0.6rem' }}>
+                        <i className="fas fa-star"></i>
+                        AI Recommended
+                      </span>
+                    ) : null}
+                  </div>
+                  <div className="insight-time">{tip.detail || tip.text || tip}</div>
+                </div>
+                {idx === 0 ? <span className="impact-pill">High Impact</span> : null}
               </div>
-              <span className="ai-badge"><i className="fas fa-robot"></i>Live</span>
-            </div>
-            <div className="insights-list">
-              {aiTipsSorted && aiTipsSorted.length > 0 ? (
-                aiTipsSorted.slice(0, 3).map((tip, idx) => (
-                  <div key={idx} className={`insight-item ${idx === 0 ? 'ai-recommended' : ''}`}>
-                    <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
-                    <div className="insight-content">
-                      <div className="insight-text"><strong>{tip.title || `Tip ${idx+1}`}</strong>{idx === 0 ? <span className="ai-badge" style={{ marginLeft: '0.6rem' }}><i className="fas fa-star"></i>AI Recommended</span> : null}</div>
-                      <div className="insight-time">{tip.detail || tip.text || tip}</div>
-                    </div>
-                    {idx === 0 ? <span className="impact-pill">High Impact</span> : null}
-                  </div>
-                ))
-              ) : (
-                <>
-                  <div className="insight-item">
-                    <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
-                    <div className="insight-content">
-                      <div className="insight-text"><strong>Quantify achievements</strong></div>
-                      <div className="insight-time">Add metrics (%, $, #) to experience bullets</div>
-                    </div>
-                  </div>
-                  <div className="insight-item">
-                    <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
-                    <div className="insight-content">
-                      <div className="insight-text"><strong>Match keywords</strong></div>
-                      <div className="insight-time">Align skills to target job description terms</div>
-                    </div>
-                  </div>
-                  <div className="insight-item">
-                    <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
-                    <div className="insight-content">
-                      <div className="insight-text"><strong>Improve formatting</strong></div>
-                      <div className="insight-time">Use consistent headings and bullet indentation</div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-          </motion.div>
+            ))
+          ) : (
+            <>
+              <div className="insight-item">
+                <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
+                <div className="insight-content">
+                  <div className="insight-text"><strong>Quantify achievements</strong></div>
+                  <div className="insight-time">Add metrics (%, $, #) to experience bullets</div>
+                </div>
+              </div>
+              <div className="insight-item">
+                <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
+                <div className="insight-content">
+                  <div className="insight-text"><strong>Match keywords</strong></div>
+                  <div className="insight-time">Align skills to target job description terms</div>
+                </div>
+              </div>
+              <div className="insight-item">
+                <div className="insight-icon"><i className="fas fa-magic" style={{color: '#a78bfa'}}></i></div>
+                <div className="insight-content">
+                  <div className="insight-text"><strong>Improve formatting</strong></div>
+                  <div className="insight-time">Use consistent headings and bullet indentation</div>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </motion.div>
 
       {/* Recent Uploads */}
-          <motion.div 
-            className="content-card-modern glass-card-dark"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.55 }}
-          >
-            <div className="card-header-modern">
-              <h2 className="card-title-modern">
-                <i className="fas fa-history"></i>
-                Recent Uploads
-              </h2>
-            </div>
+      <motion.div 
+        className="content-card-modern card-premium p-6"
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.6, delay: 0.55 }}
+      >
+        <div className="card-header-modern">
+          <h2 className="card-title-modern">
+            <i className="fas fa-history"></i>
+            Recent Uploads
+          </h2>
+        </div>
         <div className="activities-list">
           {Array.isArray(resumeData) && resumeData.length > 0 ? (
             resumeData.slice(0, 5).map((resume, idx) => (
@@ -956,15 +958,16 @@ export default function DashboardHome({ user, onNavigate }) {
               </div>
             ))
           ) : (
-            <div className="no-resumes" style={{padding: '1.5rem'}}>
+            <div className="no-resumes" style={{ padding: '1.5rem' }}>
               <i className="fas fa-inbox"></i>
               <p>No uploads yet</p>
             </div>
           )}
         </div>
-          </motion.div>
+      </motion.div>
         </div>
       </div>
     </div>
-  );
-} 
+  </div>
+);
+}

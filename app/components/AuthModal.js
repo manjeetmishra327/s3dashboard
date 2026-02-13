@@ -86,7 +86,7 @@ export default function AuthModal({ mode, onClose, onLogin, onModeChange }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+        className="fixed inset-0 bg-[color:var(--bg-app)]/80 flex items-center justify-center p-4 z-50"
         onClick={onClose}
       >
         <motion.div
@@ -220,7 +220,7 @@ export default function AuthModal({ mode, onClose, onLogin, onModeChange }) {
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm"
+                className="bg-red-500/10 border border-red-500/30 text-red-200 px-4 py-3 rounded-lg text-sm"
               >
                 {error}
               </motion.div>

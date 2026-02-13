@@ -10,13 +10,13 @@
 .dashboard-container {
   display: flex;
   min-height: 100vh;
-  background: linear-gradient(135deg, #1a1d29 0%, #2d1b3d 50%, #1a1d29 100%);
+  background: transparent;
 }
 
 /* Sidebar - Primary Accent for Active State */
 .sidebar {
   width: 280px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: rgba(20, 24, 40, 0.6);
   color: white;
   position: fixed;
   left: 0;
@@ -26,7 +26,8 @@
   transition: all 0.3s ease;
   z-index: 1000;
   box-shadow: var(--shadow-soft);
-  border-right: 1px solid var(--card-border);
+  border-right: 1px solid rgba(255,255,255,0.04);
+  backdrop-filter: blur(8px);
 }
 
 .sidebar.collapsed {
@@ -180,22 +181,28 @@
   transition: margin-left 0.3s ease;
 }
 
+.main-content.app-surface {
+  background: rgba(20, 24, 40, 0.6);
+  backdrop-filter: blur(8px);
+  border-left: 1px solid rgba(255,255,255,0.04);
+}
+
 .sidebar.collapsed + .main-content {
   margin-left: 70px;
 }
 
 .top-navbar {
-  background: rgba(26, 29, 41, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.75rem 1.5rem;
+  background: transparent;
+  border-bottom: none;
+  padding: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(20px);
+  position: static;
+  top: auto;
+  z-index: auto;
+  box-shadow: none;
+  backdrop-filter: none;
 }
 
 .navbar-left {
@@ -695,7 +702,6 @@
 
 .content-area {
   padding: 0;
-  background: linear-gradient(135deg, #1a1d29 0%, #2d1b3d 50%, #1a1d29 100%);
   min-height: calc(100vh - 80px);
   position: relative;
   overflow-x: hidden;
@@ -1062,14 +1068,93 @@
 
   --text-primary: rgba(255,255,255,0.92);
   --text-secondary: rgba(255,255,255,0.6);
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+
+  --shadow-soft: 0 10px 40px rgba(0, 0, 0, 0.21);
+  --shadow-subtle: 0 6px 20px rgba(0, 0, 0, 0.21);
+
+  --card-bg: rgba(30, 36, 60, 0.6);
+  --card-border: rgba(255,255,255,0.06);
+  --elevated-bg: rgba(40, 48, 80, 0.7);
+  --elevated-border: rgba(255,255,255,0.1);
+
+  --accent-primary: #7c5cff;
+  --accent-primary-light: rgba(124, 92, 255, 0.12);
+  --accent-primary-hover: #6a4bff;
 }
 
 body {
-  background-color: var(--bg-app);
   margin: 0;
+  background:
+    radial-gradient(1000px 600px at 80% -10%, rgba(120,80,255,0.25), transparent),
+    radial-gradient(900px 500px at 10% 20%, rgba(0,150,255,0.18), transparent),
+    #0b0f1a;
+  background-attachment: fixed;
+  overflow-x: hidden;
   padding: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
   line-height: 1.6;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(120deg, #1a1f3a, #12152a, #1a1f3a);
+  background-size: 300% 300%;
+  animation: gradientShift 18s ease infinite;
+  opacity: 0.35;
+  z-index: -2;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 40%;
+  left: 60%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(140,100,255,0.15), transparent 60%);
+  filter: blur(80px);
+  animation: floatGlow 12s ease-in-out infinite;
+  z-index: -1;
+  pointer-events: none;
+}
+
+@keyframes floatGlow {
+  0%,100% { transform: translate(-50%, -50%) scale(1); }
+  50% { transform: translate(-45%, -55%) scale(1.08); }
+}
+
+.page-transition {
+  animation: fadeInPage 0.6s ease-out;
+}
+
+@keyframes fadeInPage {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.app-surface {
+  background: rgba(20, 24, 40, 0.6);
+  backdrop-filter: blur(8px);
+  border-left: 1px solid rgba(255,255,255,0.04);
+}
+
+.section-surface {
+  background: rgba(20, 24, 40, 0.4);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: 18px;
+  padding: 24px;
 }
 
 .surface-section {
@@ -1079,16 +1164,79 @@ body {
 }
 
 .card-premium {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
+  background: rgba(20,25,45,0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.06);
   border-radius: 16px;
-  transition: all 0.25s ease;
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .card-premium:hover {
-  background: var(--bg-elevated);
-  border-color: var(--border-strong);
+  transform: translateY(-6px) scale(1.01);
+  box-shadow:
+    0 20px 60px rgba(0,0,0,0.6),
+    0 0 40px rgba(120,80,255,0.15);
 }
+
+.glass-nav {
+  position: sticky;
+  top: 0;
+  height: 80px;
+  backdrop-filter: blur(18px);
+  background: rgba(12, 16, 30, 0.65);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  z-index: 50;
+  display: flex;
+  align-items: center;
+}
+
+ .nav-container {
+   max-width: 1280px;
+   margin: 0 auto;
+   padding: 0 24px;
+   width: 100%;
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+ }
+
+ .dashboard-home-modern {
+   background: transparent !important;
+ }
+
+ .dashboard-home-modern::after {
+   display: none !important;
+ }
+
+ .dashboard-modern-bg,
+ .gradient-orb {
+   display: none !important;
+ }
+
+ .stat-card-modern,
+ .stat-card-modern.primary,
+ .stat-card-modern.secondary {
+   background: transparent !important;
+   border-color: transparent !important;
+   box-shadow: none !important;
+   backdrop-filter: none !important;
+   padding: 0 !important;
+ }
+
+ .stat-card-modern::before,
+ .stat-card-modern::after,
+ .stat-card-modern.primary::before,
+ .stat-card-modern.primary::after {
+   display: none !important;
+ }
+
+ .insight-item,
+ .insight-item:hover,
+ .insight-item.ai-recommended {
+   background: transparent !important;
+   border-color: transparent !important;
+   box-shadow: none !important;
+ }
 
 .highlight-card {
   background: var(--bg-elevated);
@@ -1119,6 +1267,12 @@ body {
 
 .btn-secondary:hover {
   background: var(--bg-card);
+}
+
+@media (min-width: 1280px) {
+  .max-w-screen-xl {
+    max-width: 1200px;
+  }
 }
 
 h1 {

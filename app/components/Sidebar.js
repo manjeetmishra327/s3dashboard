@@ -30,7 +30,7 @@ export default function Sidebar({ activeModule, onModuleChange, user }) {
   };
 
   return (
-    <div className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+    <div className={`sidebar app-surface ${isCollapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-header">
         <div className="logo">
           <i className="fas fa-rocket"></i>

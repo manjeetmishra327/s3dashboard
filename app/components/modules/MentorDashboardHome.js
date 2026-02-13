@@ -38,14 +38,9 @@ export default function MentorDashboardHome({ user }) {
 
   return (
     <div className="dashboard-home-modern">
-      <div className="dashboard-modern-bg">
-        <div className="gradient-orb orb-1"></div>
-        <div className="gradient-orb orb-2"></div>
-        <div className="gradient-orb orb-3"></div>
-      </div>
-
-      <motion.div
-        className="hero-section-modern"
+      <div className="dashboard-container">
+      <motion.section
+        className="hero-section text-center mb-16"
         initial={{ opacity: 0, y: -14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
@@ -57,13 +52,13 @@ export default function MentorDashboardHome({ user }) {
         <h1 className="page-title-modern">Mentor Dashboard</h1>
         <p className="page-subtitle-modern">Manage your sessions and student connections</p>
         <p className="page-tagline-modern">Welcome back, {firstName}. Stay on top of requests, schedule, and availability.</p>
-      </motion.div>
+      </motion.section>
 
-      <div className="stats-overview-modern">
+      <div className="stats-grid">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.title}
-            className="stat-card-modern glass-card secondary"
+            className="stat-card-modern card-premium p-6 flex flex-col justify-between secondary"
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, delay: index * 0.06 }}
@@ -88,7 +83,7 @@ export default function MentorDashboardHome({ user }) {
       <div className="dashboard-content-modern">
         <div className="dashboard-section-modern">
           <motion.div
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.45, delay: 0.15 }}
@@ -127,7 +122,7 @@ export default function MentorDashboardHome({ user }) {
           </motion.div>
 
           <motion.div
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.45, delay: 0.22 }}
@@ -160,7 +155,7 @@ export default function MentorDashboardHome({ user }) {
 
         <div className="dashboard-section-modern">
           <motion.div
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.45, delay: 0.18 }}
@@ -211,7 +206,7 @@ export default function MentorDashboardHome({ user }) {
           </motion.div>
 
           <motion.div
-            className="content-card-modern glass-card-dark"
+            className="content-card-modern card-premium p-6"
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.45, delay: 0.26 }}
@@ -243,6 +238,7 @@ export default function MentorDashboardHome({ user }) {
             </div>
           </motion.div>
         </div>
+      </div>
       </div>
     </div>
   );
