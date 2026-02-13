@@ -16,8 +16,9 @@ export default function MySessions() {
 
   return (
     <div className="dashboard-home-modern">
-      <motion.div
-        className="hero-section-modern"
+      <div className="dashboard-container">
+      <motion.section
+        className="hero-section text-center mb-16"
         initial={{ opacity: 0, y: -14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
@@ -28,7 +29,7 @@ export default function MySessions() {
         </div>
         <h1 className="page-title-modern">My Sessions</h1>
         <p className="page-subtitle-modern">Track upcoming sessions and review recent outcomes</p>
-      </motion.div>
+      </motion.section>
 
       <div className="dashboard-content-modern">
         <div className="dashboard-section-modern">
@@ -136,6 +137,7 @@ export default function MySessions() {
             </div>
           </motion.div>
         </div>
+      </div>
       </div>
     </div>
   );

@@ -415,7 +415,7 @@ export default function DashboardHome({ user, onNavigate }) {
       </motion.section>
 
       {/* Stats Overview - Modern Cards */}
-      <div className="stats-grid">
+      <div className="stats-grid stats-row">
         {stats.map((stat, index) => (
           <motion.div 
             key={index} 

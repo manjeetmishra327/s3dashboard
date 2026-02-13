@@ -16,8 +16,9 @@ export default function StudentRequests() {
 
   return (
     <div className="dashboard-home-modern">
-      <motion.div
-        className="hero-section-modern"
+      <div className="dashboard-container">
+      <motion.section
+        className="hero-section text-center mb-16"
         initial={{ opacity: 0, y: -14 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45 }}
@@ -28,7 +29,7 @@ export default function StudentRequests() {
         </div>
         <h1 className="page-title-modern">Student Requests</h1>
         <p className="page-subtitle-modern">Review and respond to incoming mentorship requests</p>
-      </motion.div>
+      </motion.section>
 
       <div className="dashboard-content-modern">
         <div className="dashboard-section-modern">
@@ -101,6 +102,7 @@ export default function StudentRequests() {
             </div>
           </motion.div>
         </div>
+      </div>
       </div>
     </div>
   );
