@@ -139,7 +139,7 @@ export default function MentorConnect() {
               {requestsLoading ? (
                 <div className="mt-4 grid grid-cols-1 gap-3">
                   {[...Array(2)].map((_, i) => (
-                    <div key={i} className="h-[72px] rounded-[var(--radius-lg)] border border-white/10 bg-white/5"></div>
+                    <div key={i} className="h-[72px] rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-card)]"></div>
                   ))}
                 </div>
               ) : requestsError ? (
@@ -158,17 +158,18 @@ export default function MentorConnect() {
                         ? 'border-green-400/20 bg-green-400/10 text-green-200'
                         : status === 'declined'
                           ? 'border-red-400/20 bg-red-400/10 text-red-200'
-                          : 'border-white/15 bg-white/5 text-white/75';
+                          : 'border-[var(--border-subtle)] bg-[var(--bg-card)] text-white/75';
 
                     return (
                       <div
                         key={r?._id || `${mentorName}-${topic}-${createdAt}`}
-                        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-[var(--radius-lg)] border border-white/10 bg-white/5 p-4"
+                        className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between rounded-[var(--radius-lg)] border border-[var(--border-subtle)] bg-[var(--bg-card)] p-4"
                       >
                         <div className="min-w-0">
                           <div className="text-sm font-semibold text-white/90 truncate">{mentorName}</div>
                           <div className="mt-0.5 text-sm text-white/60">{topic}</div>
                         </div>
+
                         <div className="flex items-center gap-3">
                           <span className={`inline-flex items-center px-2 py-1 rounded-[var(--radius-sm)] border text-xs font-semibold ${statusStyles}`}>
                             {status}
@@ -262,8 +263,9 @@ export default function MentorConnect() {
                         const list = Array.isArray(rd) ? rd : rd?.requests || rd?.data || [];
                         setMyRequests(Array.isArray(list) ? list : []);
                       }
-                    } catch {}
-                    finally {
+                    } catch (e) {
+                      console.error(e);
+                    } finally {
                       setRequestsLoading(false);
                     }
                   } catch (e) {
@@ -282,13 +284,13 @@ export default function MentorConnect() {
                     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                       <div className="min-w-0 md:flex-[1.2]">
                         <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] bg-white/5 border border-white/10 text-white/70">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] bg-[var(--bg-card)] border border-[var(--border-subtle)] text-white/70">
                             <i className="fas fa-user"></i>
                           </div>
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <h3 className="text-base md:text-lg font-semibold text-white/90 truncate">{mentor?.name || mentor?.fullName || 'Mentor'}</h3>
-                              <span className="inline-flex items-center px-2 py-1 rounded-[var(--radius-sm)] border border-white/10 bg-white/5 text-white/70 text-xs font-semibold">
+                              <span className="inline-flex items-center px-2 py-1 rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[var(--bg-card)] text-white/70 text-xs font-semibold">
                                 {role}
                               </span>
                             </div>
@@ -301,7 +303,7 @@ export default function MentorConnect() {
                       <div className="md:flex-[1.1] flex flex-col gap-2 md:items-center md:justify-center">
                         <div className="flex flex-wrap gap-2">
                           {expertise.slice(0, 4).map((skill, i) => (
-                            <span key={i} className="inline-flex items-center px-2 py-1 rounded-[var(--radius-sm)] border border-white/10 bg-white/5 text-white/70 text-xs">
+                            <span key={i} className="inline-flex items-center px-2 py-1 rounded-[var(--radius-sm)] border border-[var(--border-subtle)] bg-[var(--bg-card)] text-white/70 text-xs">
                               {skill}
                             </span>
                           ))}
@@ -338,7 +340,7 @@ export default function MentorConnect() {
                           <input
                             value={form.topic}
                             onChange={(e) => onUpdateForm({ topic: e.target.value })}
-                            className="w-full rounded-[var(--radius-md)] border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/85 outline-none"
+                            className="w-full rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-white/85 outline-none"
                             placeholder="e.g., Interview prep"
                             disabled={isSending || isSent}
                           />
@@ -348,7 +350,7 @@ export default function MentorConnect() {
                           <input
                             value={form.message}
                             onChange={(e) => onUpdateForm({ message: e.target.value })}
-                            className="w-full rounded-[var(--radius-md)] border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/85 outline-none"
+                            className="w-full rounded-[var(--radius-md)] border border-[var(--border-subtle)] bg-[var(--bg-card)] px-3 py-2 text-sm text-white/85 outline-none"
                             placeholder="Short note to the mentor"
                             disabled={isSending || isSent}
                           />
