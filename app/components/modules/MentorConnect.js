@@ -14,12 +14,11 @@ export default function MentorConnect() {
   const [connectStateByMentorId, setConnectStateByMentorId] = useState({});
   const [connectFormByMentorId, setConnectFormByMentorId] = useState({});
 
-  const API_BASE = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').toString().replace(/\/$/, '');
-
   const authHeaders = () => {
     const token = localStorage.getItem('authToken');
     const headers = { 'Content-Type': 'application/json' };
     if (token) headers.Authorization = `Bearer ${token}`;
+
     return headers;
   };
 
@@ -40,11 +39,12 @@ export default function MentorConnect() {
       setMentorsLoading(true);
       setMentorsError('');
       try {
-        const res = await fetch(`${API_BASE}/api/users?role=mentor`, { headers: authHeaders() });
+        const res = await fetch(`/api/users?role=mentor`, { headers: authHeaders() });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.message || 'Failed to fetch mentors');
         const list = Array.isArray(data) ? data : data?.users || data?.data || [];
         if (isMounted) setMentors(Array.isArray(list) ? list : []);
+
       } catch (e) {
         if (isMounted) {
           setMentors([]);
@@ -59,11 +59,12 @@ export default function MentorConnect() {
       setRequestsLoading(true);
       setRequestsError('');
       try {
-        const res = await fetch(`${API_BASE}/api/mentor-requests/student`, { headers: authHeaders() });
+        const res = await fetch(`/api/mentor-requests/student`, { headers: authHeaders() });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data?.message || 'Failed to fetch mentor requests');
         const list = Array.isArray(data) ? data : data?.requests || data?.data || [];
         if (isMounted) setMyRequests(Array.isArray(list) ? list : []);
+
       } catch (e) {
         if (isMounted) {
           setMyRequests([]);
@@ -224,7 +225,7 @@ export default function MentorConnect() {
                     [mentorId]: { status: 'loading', error: '' },
                   }));
                   try {
-                    const res = await fetch(`${API_BASE}/api/mentor-requests`, {
+                    const res = await fetch(`/api/mentor-requests`, {
                       method: 'POST',
                       headers: authHeaders(),
                       body: JSON.stringify({
@@ -255,7 +256,7 @@ export default function MentorConnect() {
                     try {
                       setRequestsLoading(true);
                       setRequestsError('');
-                      const rr = await fetch(`${API_BASE}/api/mentor-requests/student`, { headers: authHeaders() });
+                      const rr = await fetch(`/api/mentor-requests/student`, { headers: authHeaders() });
                       const rd = await rr.json().catch(() => ({}));
                       if (rr.ok) {
                         const list = Array.isArray(rd) ? rd : rd?.requests || rd?.data || [];
