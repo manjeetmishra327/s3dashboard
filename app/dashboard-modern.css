@@ -558,43 +558,6 @@
   z-index: 1;
 }
 
-/* Resume Score - Primary Hero Enhancement */
-.stat-card-modern {
-  background: transparent;
-  backdrop-filter: none;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  box-shadow: none;
-}
-
-/* Resume Score - Primary Hero Enhancement */
-.stat-card-modern.primary {
-  background: transparent;
-  backdrop-filter: none;
-  border: none;
-  border-radius: 0;
-  padding: 0;
-  transform: scale(1.05);
-  position: relative;
-  box-shadow: none;
-}
-
-.stat-card-modern.primary::after {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  pointer-events: none;
-  background: var(--accent-primary-light);
-  opacity: 1;
-  border-radius: var(--radius-lg);
-  z-index: -1;
-  display: none;
-}
-
 .stat-value-modern {
   font-size: 2.25rem;
   font-weight: 700;
@@ -629,13 +592,6 @@
 
 .stat-card-modern:hover::before {
   opacity: 1;
-}
-
-.stat-card-modern:hover {
-  background: transparent;
-  border-color: transparent;
-  box-shadow: none;
-  transform: translateY(-1px);
 }
 
 .stat-card-top {

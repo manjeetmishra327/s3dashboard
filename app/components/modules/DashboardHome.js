@@ -415,7 +415,7 @@ export default function DashboardHome({ user, onNavigate }) {
       </motion.section>
 
       {/* Stats Overview - Modern Cards */}
-      <div className="grid grid-cols-4 gap-6">
+      <div className="grid grid-cols-4 gap-6 mb-10">
         {stats.map((stat, index) => (
           <motion.div 
             key={index} 
