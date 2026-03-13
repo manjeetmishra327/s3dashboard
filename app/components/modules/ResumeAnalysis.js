@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useAnimation, useInView } from 'framer-motion';
 import { Upload, FileText, BarChart, CheckCircle, AlertCircle, Loader2, X, Download, Eye, HelpCircle, Sparkles, Lightbulb, TrendingUp, Target, Zap, Award } from 'lucide-react';
+import { parseResume } from '@/lib/api/resume';
 
 const fadeIn = {
   hidden: { opacity: 0, y: 20 },
@@ -515,19 +516,9 @@ const ResumeAnalysis = ({ user, onAnalysisComplete }) => {
     try {
       const parseStart = (typeof performance !== 'undefined' && performance.now) ? performance.now() : Date.now();
       setUploadProgress(40);
-      const response = await fetch('/api/parse-resume', {
-        method: 'POST',
-        body: formData,
-      });
+      const result = await parseResume(file);
 
       setUploadProgress(70);
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'Failed to process resume');
-      }
-
-      const result = await response.json();
       setUploadProgress(90);
 
       if (result.error) {
