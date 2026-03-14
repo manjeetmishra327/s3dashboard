@@ -1,4 +1,4 @@
-from chains.resume_chain import resume_chain
+from chains.resume_chain import get_resume_chain
 from utils.pdf_parser import extract_text_from_pdf
 from database.mongo import save_ai_profile
 
@@ -19,7 +19,8 @@ async def run_resume_agent(file_bytes: bytes, user_id: str) -> dict:
         print(f"[Resume Agent] Extracted {len(resume_text)} characters")
 
         print("[Resume Agent] Running LangChain GPT-4o parsing chain...")
-        profile = resume_chain.invoke({"resume_text": resume_text})
+        chain = get_resume_chain()
+        profile = chain.invoke({"resume_text": resume_text})
 
         profile["user_id"] = user_id
         profile["raw_text_length"] = len(resume_text)

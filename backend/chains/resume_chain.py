@@ -1,11 +1,11 @@
+import os
+from dotenv import load_dotenv
+
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env'), override=True)
+
 from langchain_openai import ChatOpenAI
 from langchain.prompts import PromptTemplate
 from langchain_core.output_parsers import JsonOutputParser
-from dotenv import load_dotenv
-
-load_dotenv()
-
-llm = ChatOpenAI(model="gpt-4o", temperature=0)
 
 RESUME_PROMPT = """
 You are a world-class resume parser and career analyst.
@@ -91,4 +91,34 @@ Rules:
 - Be specific and thorough in all descriptions
 """
 
-resume_chain = PromptTemplate.from_template(RESUME_PROMPT) | llm | JsonOutputParser()
+def get_resume_chain():
+    # Get key directly from env
+    key = os.getenv("OPENAI_API_KEY")
+    print(f"[Resume Chain] Key check: {'✅' if key else '❌ NOT FOUND'}")
+    
+    if not key:
+        # Last resort — read directly from .env file
+        env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', '.env')
+        print(f"[Resume Chain] Trying direct file read from: {env_path}")
+        with open(env_path) as f:
+            for line in f:
+                if line.startswith('OPENAI_API_KEY='):
+                    key = line.strip().split('=', 1)[1]
+                    print(f"[Resume Chain] Key read directly: ✅")
+                    break
+    
+    if not key:
+        raise ValueError("OPENAI_API_KEY is not set — check backend/.env")
+
+    # Pass key explicitly to ChatOpenAI
+    llm = ChatOpenAI(
+        model="gpt-4o",
+        temperature=0,
+        openai_api_key=key  # ← explicit key passing
+    )
+    
+    return (
+        PromptTemplate.from_template(RESUME_PROMPT)
+        | llm
+        | JsonOutputParser()
+    )
