@@ -6,7 +6,7 @@ A comprehensive Next.js application with AI-powered resume parsing and analysis 
 
 - **User Authentication**: Secure login/signup with JWT tokens
 - **Resume Upload**: Support for PDF, DOC, and DOCX files
-- **AI-Powered Analysis**: Python microservice with spaCy NLP processing
+- **AI-Powered Analysis**: Backend AI agent system (FastAPI + LangChain)
 - **Real-time Dashboard**: Dynamic stats and insights based on uploaded resumes
 - **Skills Extraction**: Automatic identification of technical skills
 - **ATS Scoring**: Applicant Tracking System compatibility scoring
@@ -15,9 +15,9 @@ A comprehensive Next.js application with AI-powered resume parsing and analysis 
 ## 🏗️ Architecture
 
 ```
-Frontend (Next.js) ←→ Backend (Next.js API) ←→ Python Microservice
-                           ↓
-                    MongoDB Database
+Frontend (Next.js) ←→ Backend (FastAPI)
+                     ↓
+                MongoDB Database
 ```
 
 ## 📁 Project Structure
@@ -33,10 +33,10 @@ s3/
 │   │   ├── modules/              # Dashboard modules
 │   │   └── ...
 │   └── ...
-├── python-service/               # Python microservice
-│   ├── main.py                   # FastAPI application
-│   ├── requirements.txt          # Python dependencies
-│   └── start.py                  # Service startup script
+├── backend/                      # FastAPI backend (AI agent system)
+│   ├── main.py
+│   ├── requirements.txt
+│   └── ...
 └── uploads/                      # File upload directory
 ```
 
@@ -54,40 +54,35 @@ s3/
 # Install Node.js dependencies
 npm install
 
-# Install Python dependencies
-cd python-service
+# Install backend dependencies
+cd backend
 pip install -r requirements.txt
-python -m spacy download en_core_web_sm
 ```
 
 ### 2. Environment Variables
 
-Create a `.env.local` file in the root directory:
+Create a `backend/.env` file (copy from `backend/.env.example`):
 
 ```env
+OPENAI_API_KEY=your_openai_key_here
 MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret_key
-PYTHON_SERVICE_URL=http://localhost:8000
+MONGODB_DB_NAME=s3_dashboard
+CHROMA_PERSIST_DIR=./chroma_db
+ENVIRONMENT=development
+FRONTEND_URL=http://localhost:3000
 ```
 
 ### 3. Start Services
-
-**Option 1: Use the batch script (Windows)**
-```bash
-start-services.bat
-```
-
-**Option 2: Manual startup**
 
 Terminal 1 (Next.js):
 ```bash
 npm run dev
 ```
 
-Terminal 2 (Python Service):
+Terminal 2 (Backend API):
 ```bash
-cd python-service
-python start.py
+cd backend
+uvicorn main:app --reload
 ```
 
 ## 🔧 API Endpoints
@@ -101,16 +96,16 @@ python start.py
 - `POST /api/resume/upload` - Upload and analyze resume
 - `GET /api/resume/history` - Get user's resume history
 
-### Python Service
-- `POST /parse-resume` - Parse resume file
+### Backend
 - `GET /health` - Health check
+- `POST /resume/parse` - Parse resume PDF into an AI profile
 
 ## 📊 Resume Analysis Features
 
 ### Skills Extraction
 - Identifies technical skills from resume text
 - Supports 50+ common programming languages and frameworks
-- Uses spaCy NLP for intelligent skill recognition
+- Uses AI agent parsing (LangChain + OpenAI) for comprehensive extraction
 
 ### ATS Scoring
 - Calculates compatibility with Applicant Tracking Systems
@@ -153,9 +148,8 @@ npm start
 ```dockerfile
 FROM python:3.9-slim
 WORKDIR /app
-COPY python-service/ .
+COPY backend/ .
 RUN pip install -r requirements.txt
-RUN python -m spacy download en_core_web_sm
 EXPOSE 8000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 ```
@@ -191,9 +185,8 @@ curl -X POST http://localhost:8000/health
 
 1. **Python Service Not Starting**
    ```bash
-   cd python-service
+   cd backend
    pip install -r requirements.txt
-   python -m spacy download en_core_web_sm
    ```
 
 2. **MongoDB Connection Issues**
@@ -220,7 +213,5 @@ This project is licensed under the MIT License.
 
 ## 🙏 Acknowledgments
 
-- spaCy for NLP processing
-- pdfplumber for PDF text extraction
-- FastAPI for Python microservice
+- FastAPI for backend API
 - Next.js for frontend framework

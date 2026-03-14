@@ -19,6 +19,8 @@ dist/
 .env.test.local
 .env.production.local
 
+.venv/
+
 # Logs
 logs
 *.log
@@ -108,6 +110,8 @@ Thumbs.db
 
 # Uploads directory
 uploads/
+
+chroma_db/
 
 # Resume parser temporary files
 temp/
