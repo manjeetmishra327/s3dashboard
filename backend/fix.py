@@ -172,15 +172,347 @@ with open(path, "rb") as f:
     print("jsearch.py:", "CLEAN" if b"\x00" not in data else "CORRUPTED")
 
 # ============================================
+# FIX vectorstore/qdrant_client.py
+# ============================================
+qdrant_code = """import os
+from qdrant_client import QdrantClient
+from qdrant_client.models import Distance, VectorParams, PointStruct
+from openai import OpenAI
+import uuid
+
+QDRANT_URL = os.environ.get("QDRANT_URL")
+QDRANT_API_KEY = os.environ.get("QDRANT_API_KEY")
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+
+print("[Qdrant] URL:", "OK" if QDRANT_URL else "MISSING")
+print("[Qdrant] Key:", "OK" if QDRANT_API_KEY else "MISSING")
+
+qdrant = QdrantClient(url=QDRANT_URL, api_key=QDRANT_API_KEY)
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+JOBS_COLLECTION = "jobs"
+PROFILES_COLLECTION = "profiles"
+VECTOR_SIZE = 1536
+
+
+def get_embedding(text):
+    text = text.strip().replace("\\n", " ")
+    response = openai_client.embeddings.create(
+        input=[text],
+        model="text-embedding-3-small"
+    )
+    return response.data[0].embedding
+
+
+def ensure_collection(name):
+    existing = [c.name for c in qdrant.get_collections().collections]
+    if name not in existing:
+        qdrant.create_collection(
+            collection_name=name,
+            vectors_config=VectorParams(size=VECTOR_SIZE, distance=Distance.COSINE)
+        )
+        print("[Qdrant] Created collection:", name)
+    else:
+        print("[Qdrant] Collection exists:", name)
+
+
+def embed_and_store_jobs(jobs, user_id):
+    ensure_collection(JOBS_COLLECTION)
+    points = []
+    for job in jobs:
+        job_text = (
+            "Title: " + job.get("title", "") + " " +
+            "Company: " + job.get("company", "") + " " +
+            "Location: " + job.get("location", "") + " " +
+            "Description: " + job.get("description", "") + " " +
+            "Skills: " + ", ".join(job.get("skills_required", []))
+        )
+        vector = get_embedding(job_text)
+        points.append(PointStruct(
+            id=str(uuid.uuid4()),
+            vector=vector,
+            payload={
+                "user_id": user_id,
+                "title": job.get("title", ""),
+                "company": job.get("company", ""),
+                "location": job.get("location", ""),
+                "salary": job.get("salary", ""),
+                "url": job.get("url", ""),
+                "source": job.get("source", ""),
+                "description": job.get("description", ""),
+                "skills_required": job.get("skills_required", []),
+                "employment_type": job.get("employment_type", ""),
+                "is_remote": job.get("is_remote", False),
+            }
+        ))
+    qdrant.upsert(collection_name=JOBS_COLLECTION, points=points)
+    print("[Qdrant] Embedded", len(points), "jobs for user:", user_id)
+
+
+def embed_user_profile(profile, user_id):
+    ensure_collection(PROFILES_COLLECTION)
+    profile_text = (
+        "Name: " + profile.get("name", "") + " " +
+        "Domain: " + profile.get("domain", "") + " " +
+        "Target Role: " + profile.get("target_role", "") + " " +
+        "Experience: " + profile.get("experience_level", "") + " " +
+        "Skills: " + ", ".join(profile.get("skills", [])) + " " +
+        "Frameworks: " + ", ".join(profile.get("frameworks", [])) + " " +
+        "Tools: " + ", ".join(profile.get("tools", []))
+    )
+    vector = get_embedding(profile_text)
+    qdrant.upsert(
+        collection_name=PROFILES_COLLECTION,
+        points=[PointStruct(
+            id=user_id,
+            vector=vector,
+            payload={
+                "user_id": user_id,
+                "name": profile.get("name", ""),
+                "domain": profile.get("domain", ""),
+                "target_role": profile.get("target_role", ""),
+                "skills": profile.get("skills", []),
+                "experience_level": profile.get("experience_level", "")
+            }
+        )]
+    )
+    print("[Qdrant] Embedded profile for user:", user_id)
+
+
+def search_matching_jobs(user_id, profile, top_k=10):
+    ensure_collection(JOBS_COLLECTION)
+    profile_text = (
+        "Domain: " + profile.get("domain", "") + " " +
+        "Target Role: " + profile.get("target_role", "") + " " +
+        "Skills: " + ", ".join(profile.get("skills", [])) + " " +
+        "Experience: " + profile.get("experience_level", "")
+    )
+    query_vector = get_embedding(profile_text)
+    results = qdrant.search(
+        collection_name=JOBS_COLLECTION,
+        query_vector=query_vector,
+        query_filter={
+            "must": [{"key": "user_id", "match": {"value": user_id}}]
+        },
+        limit=top_k,
+        with_payload=True
+    )
+    matches = []
+    for result in results:
+        job = result.payload
+        job["similarity_score"] = round(result.score * 100, 1)
+        matches.append(job)
+    print("[Qdrant] Found", len(matches), "matches for user:", user_id)
+    return matches
+"""
+
+os.makedirs("vectorstore", exist_ok=True)
+path = os.path.join("vectorstore", "qdrant_client.py")
+if os.path.exists(path):
+    os.remove(path)
+with open(path, "wb") as f:
+    f.write(qdrant_code.encode("utf-8"))
+with open(path, "rb") as f:
+    data = f.read()
+    print("vectorstore/qdrant_client.py:", "CLEAN" if b"\x00" not in data else "CORRUPTED")
+
+# ============================================
+# FIX agents/job_matching_agent.py
+# ============================================
+job_matching_code = """import os
+import json
+from vectorstore.qdrant_client import embed_and_store_jobs, embed_user_profile, search_matching_jobs
+from database.mongo import get_ai_profile, get_jobs
+from openai import OpenAI
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+openai_client = OpenAI(api_key=OPENAI_API_KEY)
+
+async def run_job_matching_agent(user_id):
+    print("[Job Matching Agent] Starting for user:", user_id)
+    try:
+        # Step 1: Get AI profile from MongoDB
+        profile_doc = await get_ai_profile(user_id)
+        if not profile_doc:
+            return {"success": False, "error": "No profile found"}
+        profile = profile_doc.get("profile", {})
+        print("[Job Matching Agent] Profile loaded:", profile.get("name"))
+
+        # Step 2: Get scraped jobs from MongoDB
+        jobs = await get_jobs(user_id)
+        if not jobs:
+            return {"success": False, "error": "No jobs found. Run scraper first."}
+        print("[Job Matching Agent] Jobs loaded:", len(jobs))
+
+        # Step 3: Embed jobs into Qdrant
+        print("[Job Matching Agent] Embedding jobs into Qdrant...")
+        embed_and_store_jobs(jobs, user_id)
+
+        # Step 4: Embed user profile into Qdrant
+        print("[Job Matching Agent] Embedding profile into Qdrant...")
+        embed_user_profile(profile, user_id)
+
+        # Step 5: Vector similarity search
+        print("[Job Matching Agent] Searching for matches...")
+        matches = search_matching_jobs(user_id, profile, top_k=10)
+
+        # Step 6: GPT-4o explains each match
+        print("[Job Matching Agent] GPT-4o explaining matches...")
+        enriched = explain_matches(profile, matches)
+
+        print("[Job Matching Agent] Done. Matches:", len(enriched))
+        return {
+            "success": True,
+            "total_jobs_scanned": len(jobs),
+            "matches": enriched
+        }
+
+    except Exception as e:
+        print("[Job Matching Agent] Error:", e)
+        return {"success": False, "error": str(e)}
+
+
+def explain_matches(profile, matches):
+    prompt = (
+        "You are a career advisor AI.\\n"
+        "User Profile:\\n"
+        "- Name: " + profile.get("name", "") + "\\n"
+        "- Domain: " + profile.get("domain", "") + "\\n"
+        "- Target Role: " + profile.get("target_role", "") + "\\n"
+        "- Experience: " + profile.get("experience_level", "") + "\\n"
+        "- Skills: " + ", ".join(profile.get("skills", [])[:15]) + "\\n\\n"
+        "Job Matches:\\n" + json.dumps([{
+            "index": i,
+            "title": m.get("title"),
+            "company": m.get("company"),
+            "skills_required": m.get("skills_required", []),
+            "similarity_score": m.get("similarity_score")
+        } for i, m in enumerate(matches)], indent=2) + "\\n\\n"
+        "For each job return a JSON array:\\n"
+        "[{\\n"
+        "  \\"index\\": number,\\n"
+        "  \\"match_score\\": number 0-100,\\n"
+        "  \\"why_this_fits\\": \\"2 sentence explanation\\",\\n"
+        "  \\"skill_overlap\\": [\\"skill1\\", \\"skill2\\"],\\n"
+        "  \\"missing_skills\\": [\\"skill1\\"],\\n"
+        "  \\"skill_overlap_percent\\": number\\n"
+        "}]\\n"
+        "Return ONLY the JSON array, no extra text."
+    )
+    response = openai_client.chat.completions.create(
+        model="gpt-4o",
+        messages=[{"role": "user", "content": prompt}],
+        temperature=0
+    )
+    try:
+        explanations = json.loads(response.choices[0].message.content)
+        for match in matches:
+            idx = matches.index(match)
+            explanation = next((e for e in explanations if e.get("index") == idx), {})
+            match["match_score"] = explanation.get("match_score", match.get("similarity_score", 0))
+            match["why_this_fits"] = explanation.get("why_this_fits", "")
+            match["skill_overlap"] = explanation.get("skill_overlap", [])
+            match["missing_skills"] = explanation.get("missing_skills", [])
+            match["skill_overlap_percent"] = explanation.get("skill_overlap_percent", 0)
+        return sorted(matches, key=lambda x: x.get("match_score", 0), reverse=True)
+    except Exception as e:
+        print("[Job Matching Agent] GPT-4o parse error:", e)
+        return matches
+"""
+
+path = os.path.join("agents", "job_matching_agent.py")
+if os.path.exists(path):
+    os.remove(path)
+with open(path, "wb") as f:
+    f.write(job_matching_code.encode("utf-8"))
+with open(path, "rb") as f:
+    data = f.read()
+    print("agents/job_matching_agent.py:", "CLEAN" if b"\x00" not in data else "CORRUPTED")
+
+# ============================================
+# FIX routes/jobs.py
+# ============================================
+jobs_route_code = """from fastapi import APIRouter, HTTPException, Query
+from scrapers.jsearch import fetch_jobs_jsearch
+from database.mongo import save_jobs, get_jobs, get_ai_profile
+from agents.job_matching_agent import run_job_matching_agent
+
+router = APIRouter(prefix="/jobs", tags=["Jobs"])
+
+@router.get("/test-jsearch")
+async def test_jsearch(keywords: str = Query(default="software developer")):
+    jobs = await fetch_jobs_jsearch(keywords)
+    return {"total": len(jobs), "sample": jobs[:2]}
+
+@router.post("/scrape")
+async def scrape_jobs(user_id: str = Query(...)):
+    profile_doc = await get_ai_profile(user_id)
+    if not profile_doc:
+        raise HTTPException(404, "No profile found. Upload resume first.")
+    profile = profile_doc.get("profile", {})
+    keywords = profile.get("target_role") or profile.get("domain", "software developer")
+    print("[Jobs] Scraping for:", keywords)
+    jobs = await fetch_jobs_jsearch(keywords)
+    if not jobs:
+        raise HTTPException(500, "No jobs found")
+    await save_jobs(user_id, jobs)
+    return {
+        "success": True,
+        "total_jobs": len(jobs),
+        "keywords_used": keywords,
+        "message": "Scraped and saved " + str(len(jobs)) + " jobs"
+    }
+
+@router.get("/list")
+async def list_jobs(user_id: str = Query(...)):
+    jobs = await get_jobs(user_id)
+    return {"total": len(jobs), "jobs": jobs}
+
+@router.get("/match")
+async def match_jobs(user_id: str = Query(...)):
+    result = await run_job_matching_agent(user_id)
+    if not result["success"]:
+        raise HTTPException(500, result.get("error", "Matching failed"))
+    return result
+
+@router.post("/scrape-and-match")
+async def scrape_and_match(user_id: str = Query(...)):
+    profile_doc = await get_ai_profile(user_id)
+    if not profile_doc:
+        raise HTTPException(404, "No profile found. Upload resume first.")
+    profile = profile_doc.get("profile", {})
+    keywords = profile.get("target_role") or profile.get("domain", "software developer")
+    jobs = await fetch_jobs_jsearch(keywords)
+    if not jobs:
+        raise HTTPException(500, "No jobs found")
+    await save_jobs(user_id, jobs)
+    result = await run_job_matching_agent(user_id)
+    return {
+        "success": True,
+        "total_scraped": len(jobs),
+        "matches": result.get("matches", [])
+    }
+"""
+
+path = os.path.join("routes", "jobs.py")
+if os.path.exists(path):
+    os.remove(path)
+with open(path, "wb") as f:
+    f.write(jobs_route_code.encode("utf-8"))
+with open(path, "rb") as f:
+    data = f.read()
+    print("routes/jobs.py:", "CLEAN" if b"\x00" not in data else "CORRUPTED")
+
+# ============================================
 # FIX ALL __init__.py files
 # ============================================
-for folder in ["scrapers", "routes", "database", "agents", "chains", "utils"]:
+for folder in ["scrapers", "routes", "database", "agents", "chains", "utils", "vectorstore"]:
     init = os.path.join(folder, "__init__.py")
     if os.path.exists(init):
         os.remove(init)
     with open(init, "wb") as f:
         f.write(b"")
-    print(f"{folder}/__init__.py: FIXED")
+    print(folder + "/__init__.py: FIXED")
 
 # ============================================
 # CLEAR ALL pycache
