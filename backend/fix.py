@@ -1,4 +1,6 @@
 import os
+
+code = """import os
 import httpx
 
 
@@ -61,3 +63,46 @@ async def fetch_jobs_jsearch(keywords, location="India"):
     except Exception as e:
         print("[JSearch] Error:", e)
     return jobs
+"""
+
+# Fix jsearch.py
+path = os.path.join("scrapers", "jsearch.py")
+if os.path.exists(path):
+    os.remove(path)
+with open(path, "w", encoding="utf-8") as f:
+    f.write(code)
+with open(path, "rb") as f:
+    data = f.read()
+    if b"\x00" in data:
+        print("FAILED - jsearch.py corrupted")
+    else:
+        print("SUCCESS - jsearch.py clean!")
+# Verify RAPIDAPI_KEY loads
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+with open(env_path) as f:
+    for line in f:
+        if 'RAPIDAPI_KEY' in line:
+            print("RAPIDAPI_KEY found in .env:", line.strip()[:30])
+# Fix scrapers/__init__.py
+init_path = os.path.join("scrapers", "__init__.py")
+if os.path.exists(init_path):
+    os.remove(init_path)
+with open(init_path, "w", encoding="utf-8") as f:
+    f.write("")
+print("SUCCESS - scrapers/__init__.py fixed!")
+
+# Fix routes/__init__.py
+routes_init = os.path.join("routes", "__init__.py")
+if os.path.exists(routes_init):
+    os.remove(routes_init)
+with open(routes_init, "w", encoding="utf-8") as f:
+    f.write("")
+print("SUCCESS - routes/__init__.py fixed!")
+
+# Clear all pycache
+import shutil
+for root, dirs, files in os.walk("."):
+    for d in dirs:
+        if d == "__pycache__":
+            shutil.rmtree(os.path.join(root, d))
+print("SUCCESS - all pycache cleared!")

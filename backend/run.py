@@ -1,18 +1,19 @@
 import os
-from dotenv import load_dotenv
 
-# Load env BEFORE uvicorn spawns anything
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-load_dotenv(dotenv_path=os.path.join(BASE_DIR, '.env'), override=True)
+env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '.env')
+with open(env_path) as f:
+    for line in f:
+        line = line.strip()
+        if '=' in line and not line.startswith('#'):
+            k, v = line.split('=', 1)
+            os.environ[k.strip()] = v.strip()
 
-# Set explicitly in os.environ so subprocess inherits it
-os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY", "")
-os.environ["MONGODB_URI"] = os.getenv("MONGODB_URI", "")
-os.environ["MONGODB_DB_NAME"] = os.getenv("MONGODB_DB_NAME", "s3_dashboard")
-
-print(f"[Run] OpenAI Key: {'✅' if os.environ.get('OPENAI_API_KEY') else '❌'}")
+print('[Run] OpenAI:', 'OK' if os.environ.get('OPENAI_API_KEY') else 'MISSING')
+print('[Run] RapidAPI:', 'OK' if os.environ.get('RAPIDAPI_KEY') else 'MISSING')
+print('[Run] MongoDB:', 'OK' if os.environ.get('MONGODB_URI') else 'MISSING')
+print('[Run] Qdrant:', 'OK' if os.environ.get('QDRANT_URL') else 'MISSING')
 
 import uvicorn
 
-if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+if __name__ == '__main__':
+    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=False)

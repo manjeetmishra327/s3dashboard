@@ -1,8 +1,13 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Query
+from scrapers.jsearch import fetch_jobs_jsearch
 
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
-
-@router.get("/match")
-async def match_jobs(user_id: str):
-    return {"message": "Job matching agent coming soon", "jobs": []}
+@router.get("/test-jsearch")
+async def test_jsearch(keywords: str = Query(default="software developer")):
+    """Test JSearch API connection"""
+    jobs = await fetch_jobs_jsearch(keywords)
+    return {
+        "total": len(jobs),
+        "sample": jobs[:2]  # show first 2 only
+    }
