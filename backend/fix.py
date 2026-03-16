@@ -172,7 +172,7 @@ with open(path, "rb") as f:
     print("jsearch.py:", "CLEAN" if b"\x00" not in data else "CORRUPTED")
 
 # ============================================
-# FIX vectorstore/qdrant_client.py
+# FIX vectorstore/qdrant_client.py (UUID FIX)
 # ============================================
 qdrant_code = """import os
 from qdrant_client import QdrantClient
@@ -264,7 +264,7 @@ def embed_user_profile(profile, user_id):
     qdrant.upsert(
         collection_name=PROFILES_COLLECTION,
         points=[PointStruct(
-            id=user_id,
+            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, user_id)),
             vector=vector,
             payload={
                 "user_id": user_id,
@@ -331,32 +331,26 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY)
 async def run_job_matching_agent(user_id):
     print("[Job Matching Agent] Starting for user:", user_id)
     try:
-        # Step 1: Get AI profile from MongoDB
         profile_doc = await get_ai_profile(user_id)
         if not profile_doc:
             return {"success": False, "error": "No profile found"}
         profile = profile_doc.get("profile", {})
         print("[Job Matching Agent] Profile loaded:", profile.get("name"))
 
-        # Step 2: Get scraped jobs from MongoDB
         jobs = await get_jobs(user_id)
         if not jobs:
             return {"success": False, "error": "No jobs found. Run scraper first."}
         print("[Job Matching Agent] Jobs loaded:", len(jobs))
 
-        # Step 3: Embed jobs into Qdrant
         print("[Job Matching Agent] Embedding jobs into Qdrant...")
         embed_and_store_jobs(jobs, user_id)
 
-        # Step 4: Embed user profile into Qdrant
         print("[Job Matching Agent] Embedding profile into Qdrant...")
         embed_user_profile(profile, user_id)
 
-        # Step 5: Vector similarity search
         print("[Job Matching Agent] Searching for matches...")
         matches = search_matching_jobs(user_id, profile, top_k=10)
 
-        # Step 6: GPT-4o explains each match
         print("[Job Matching Agent] GPT-4o explaining matches...")
         enriched = explain_matches(profile, matches)
 

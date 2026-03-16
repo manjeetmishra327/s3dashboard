@@ -88,7 +88,7 @@ def embed_user_profile(profile, user_id):
     qdrant.upsert(
         collection_name=PROFILES_COLLECTION,
         points=[PointStruct(
-            id=user_id,
+            id=str(uuid.uuid5(uuid.NAMESPACE_DNS, user_id)),
             vector=vector,
             payload={
                 "user_id": user_id,
