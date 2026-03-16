@@ -46,48 +46,54 @@ async def run_job_matching_agent(user_id):
 
 
 def explain_matches(profile, matches):
-    prompt = (
-        "You are a career advisor AI.\n"
-        "User Profile:\n"
-        "- Name: " + profile.get("name", "") + "\n"
-        "- Domain: " + profile.get("domain", "") + "\n"
-        "- Target Role: " + profile.get("target_role", "") + "\n"
-        "- Experience: " + profile.get("experience_level", "") + "\n"
-        "- Skills: " + ", ".join(profile.get("skills", [])[:15]) + "\n\n"
-        "Job Matches:\n" + json.dumps([{
-            "index": i,
-            "title": m.get("title"),
-            "company": m.get("company"),
-            "skills_required": m.get("skills_required", []),
-            "similarity_score": m.get("similarity_score")
-        } for i, m in enumerate(matches)], indent=2) + "\n\n"
-        "For each job return a JSON array:\n"
-        "[{\n"
-        "  \"index\": number,\n"
-        "  \"match_score\": number 0-100,\n"
-        "  \"why_this_fits\": \"2 sentence explanation\",\n"
-        "  \"skill_overlap\": [\"skill1\", \"skill2\"],\n"
-        "  \"missing_skills\": [\"skill1\"],\n"
-        "  \"skill_overlap_percent\": number\n"
-        "}]\n"
-        "Return ONLY the JSON array, no extra text."
-    )
-    response = openai_client.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-        temperature=0
-    )
+    if not matches:
+        return matches
     try:
-        explanations = json.loads(response.choices[0].message.content)
+        prompt = (
+            "You are a career advisor AI.\n"
+            "User Profile:\n"
+            "- Name: " + profile.get("name", "") + "\n"
+            "- Domain: " + profile.get("domain", "") + "\n"
+            "- Target Role: " + profile.get("target_role", "") + "\n"
+            "- Experience: " + profile.get("experience_level", "") + "\n"
+            "- Skills: " + ", ".join(profile.get("skills", [])[:15]) + "\n\n"
+            "Job Matches:\n" + json.dumps([{
+                "index": i,
+                "title": m.get("title"),
+                "company": m.get("company"),
+                "skills_required": m.get("skills_required", []),
+                "similarity_score": m.get("similarity_score")
+            } for i, m in enumerate(matches)], indent=2) + "\n\n"
+            "For each job return a JSON array. Return ONLY valid JSON, no markdown, no backticks:\n"
+            "[{index, match_score, why_this_fits, skill_overlap, missing_skills, skill_overlap_percent}]"
+        )
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a JSON-only response bot. Never use markdown or backticks."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0
+        )
+        raw = response.choices[0].message.content.strip()
+        raw = raw.replace("```json", "").replace("```", "").strip()
+        print("[Job Matching Agent] GPT-4o raw length:", len(raw))
+        explanations = json.loads(raw)
         for match in matches:
             idx = matches.index(match)
             explanation = next((e for e in explanations if e.get("index") == idx), {})
             match["match_score"] = explanation.get("match_score", match.get("similarity_score", 0))
-            match["why_this_fits"] = explanation.get("why_this_fits", "")
+            match["why_this_fits"] = explanation.get("why_this_fits", "Good match based on skills")
             match["skill_overlap"] = explanation.get("skill_overlap", [])
             match["missing_skills"] = explanation.get("missing_skills", [])
             match["skill_overlap_percent"] = explanation.get("skill_overlap_percent", 0)
         return sorted(matches, key=lambda x: x.get("match_score", 0), reverse=True)
     except Exception as e:
         print("[Job Matching Agent] GPT-4o parse error:", e)
-        return matches
+        for match in matches:
+            match["match_score"] = match.get("similarity_score", 0)
+            match["why_this_fits"] = "Match based on vector similarity"
+            match["skill_overlap"] = []
+            match["missing_skills"] = []
+            match["skill_overlap_percent"] = 0
+        return sorted(matches, key=lambda x: x.get("match_score", 0), reverse=True)

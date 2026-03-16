@@ -1,6 +1,6 @@
 import os
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct
+from qdrant_client.models import Distance, VectorParams, PointStruct, PayloadSchemaType
 from openai import OpenAI
 import uuid
 
@@ -38,6 +38,15 @@ def ensure_collection(name):
         print("[Qdrant] Created collection:", name)
     else:
         print("[Qdrant] Collection exists:", name)
+    try:
+        qdrant.create_payload_index(
+            collection_name=name,
+            field_name="user_id",
+            field_schema=PayloadSchemaType.KEYWORD
+        )
+        print("[Qdrant] user_id index ensured for:", name)
+    except Exception:
+        pass
 
 
 def embed_and_store_jobs(jobs, user_id):
