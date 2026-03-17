@@ -515,7 +515,7 @@ with open(path, "rb") as f:
 # ============================================
 # FIX ALL __init__.py files
 # ============================================
-for folder in ["scrapers", "routes", "database", "agents", "chains", "utils", "vectorstore"]:
+for folder in ["scrapers", "routes", "database", "agents", "chains", "utils", "vectorstore","routers"]:
     init = os.path.join(folder, "__init__.py")
     if os.path.exists(init):
         os.remove(init)
