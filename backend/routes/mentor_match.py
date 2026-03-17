@@ -3,14 +3,13 @@ from fastapi import APIRouter, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from qdrant_client import QdrantClient
 from openai import OpenAI
-from bson import ObjectId
 
 router = APIRouter()
 
 # Clients
 mongo_client = AsyncIOMotorClient(os.environ.get("MONGODB_URI"))
 db = mongo_client[os.environ.get("MONGODB_DB_NAME", "s3_dashboard")]
-users_collection = db["users"]
+ai_profiles_collection = db["ai_profiles"]  # ← students live here
 
 qdrant = QdrantClient(
     url=os.environ.get("QDRANT_URL"),
@@ -31,7 +30,6 @@ def get_embedding(text: str) -> list[float]:
 
 
 def build_student_query_text(ai_profile: dict) -> str:
-    """Convert student aiProfile into text for Qdrant search."""
     skills = ", ".join(ai_profile.get("skills", []))
     interests = ", ".join(ai_profile.get("interests", []))
     goals = ai_profile.get("career_goals", "")
@@ -48,7 +46,6 @@ def build_student_query_text(ai_profile: dict) -> str:
 
 
 def explain_mentor_match(student_profile: dict, mentor: dict) -> str:
-    """Use GPT-4o to explain why this mentor matches the student."""
     prompt = f"""
 You are a career mentor matching assistant.
 
@@ -83,24 +80,18 @@ Keep it encouraging and professional.
 
 @router.get("/mentors/match")
 async def match_mentors(user_id: str):
-    # Step 1 — Fetch student from MongoDB
-    try:
-        student = await users_collection.find_one({"_id": ObjectId(user_id)})
-    except Exception:
-        raise HTTPException(status_code=400, detail="Invalid user_id format")
+    # Step 1 — Fetch student from ai_profiles collection
+    student_doc = await ai_profiles_collection.find_one({"user_id": user_id})
 
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
+    if not student_doc:
+        raise HTTPException(status_code=404, detail=f"No profile found for user_id: {user_id}. Upload resume first.")
 
-    if student.get("role") != "student":
-        raise HTTPException(status_code=400, detail="User is not a student")
-
-    # Step 2 — Get student's aiProfile
-    ai_profile = student.get("aiProfile", {})
+    # Step 2 — Get aiProfile
+    ai_profile = student_doc.get("profile", {})
     if not ai_profile or not ai_profile.get("skills"):
         raise HTTPException(
             status_code=400,
-            detail="Student aiProfile is empty. Please complete resume parsing first."
+            detail="Student profile has no skills. Please complete resume parsing first."
         )
 
     # Step 3 — Embed student query
@@ -116,7 +107,7 @@ async def match_mentors(user_id: str):
     )
 
     if not search_results:
-        raise HTTPException(status_code=404, detail="No mentors found")
+        raise HTTPException(status_code=404, detail="No mentors found in Qdrant")
 
     # Step 5 — Build response with GPT-4o explanations
     matched_mentors = []
@@ -135,13 +126,13 @@ async def match_mentors(user_id: str):
             "years_experience": mentor_data.get("years_experience"),
             "linkedin": mentor_data.get("linkedin"),
             "bio": mentor_data.get("bio"),
-            "match_score": round(result.score * 100, 1),  # e.g. 87.3%
+            "match_score": round(result.score * 100, 1),
             "why_match": explanation
         })
 
     return {
-        "student_id": user_id,
-        "student_name": student.get("name"),
+        "user_id": user_id,
+        "student_name": ai_profile.get("name", "Student"),
         "total_matches": len(matched_mentors),
         "mentors": matched_mentors
     }

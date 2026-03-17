@@ -11,7 +11,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import resume, jobs, mentors, skills, progress
-from routes.mentor_match import router as mentor_match_router   # ← NEW
+from routes.mentor_match import router as mentor_match_router   
 
 app = FastAPI(
     title="S3 Dashboard API",
