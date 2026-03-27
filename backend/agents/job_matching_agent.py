@@ -28,7 +28,8 @@ async def run_job_matching_agent(user_id):
         embed_user_profile(profile, user_id)
 
         print("[Job Matching Agent] Searching for matches...")
-        matches = search_matching_jobs(user_id, profile, top_k=10)
+        top_k = min(len(jobs), 30)
+        matches = search_matching_jobs(user_id, profile, top_k=top_k)
 
         print("[Job Matching Agent] GPT-4o explaining matches...")
         enriched = explain_matches(profile, matches)
@@ -64,13 +65,16 @@ def explain_matches(profile, matches):
                 "skills_required": m.get("skills_required", []),
                 "similarity_score": m.get("similarity_score")
             } for i, m in enumerate(matches)], indent=2) + "\n\n"
-            "For each job return a JSON array. Return ONLY valid JSON, no markdown, no backticks:\n"
-            "[{index, match_score, why_this_fits, skill_overlap, missing_skills, skill_overlap_percent}]"
+            "For each job return a JSON array. Return ONLY valid JSON, no markdown, no backticks.\n"
+            "match_score MUST be an integer between 30 and 100. Never return 0.\n"
+            "Format: [{\"index\": 0, \"match_score\": 85, \"why_this_fits\": \"...\", "
+            "\"skill_overlap\": [\"React\"], \"missing_skills\": [\"Docker\"], "
+            "\"skill_overlap_percent\": 70}]"
         )
         response = openai_client.chat.completions.create(
             model="gpt-4o",
             messages=[
-                {"role": "system", "content": "You are a JSON-only response bot. Never use markdown or backticks."},
+                {"role": "system", "content": "You are a JSON-only response bot. Never use markdown or backticks. match_score is always an integer 30-100."},
                 {"role": "user", "content": prompt}
             ],
             temperature=0
@@ -79,19 +83,32 @@ def explain_matches(profile, matches):
         raw = raw.replace("```json", "").replace("```", "").strip()
         print("[Job Matching Agent] GPT-4o raw length:", len(raw))
         explanations = json.loads(raw)
+
         for match in matches:
             idx = matches.index(match)
-            explanation = next((e for e in explanations if e.get("index") == idx), {})
-            match["match_score"] = explanation.get("match_score", match.get("similarity_score", 0))
-            match["why_this_fits"] = explanation.get("why_this_fits", "Good match based on skills")
-            match["skill_overlap"] = explanation.get("skill_overlap", [])
-            match["missing_skills"] = explanation.get("missing_skills", [])
-            match["skill_overlap_percent"] = explanation.get("skill_overlap_percent", 0)
+            exp = next((e for e in explanations if e.get("index") == idx), {})
+
+            # Normalize similarity_score to 0-100 range
+            sim = match.get("similarity_score", 0)
+            if isinstance(sim, float) and sim <= 1.0:
+                sim = round(sim * 100)
+
+            gpt_score = exp.get("match_score")
+            match["match_score"] = gpt_score if (isinstance(gpt_score, (int, float)) and gpt_score > 0) else sim
+            match["why_this_fits"] = exp.get("why_this_fits", "Good match based on your skills")
+            match["skill_overlap"] = exp.get("skill_overlap", [])
+            match["missing_skills"] = exp.get("missing_skills", [])
+            match["skill_overlap_percent"] = exp.get("skill_overlap_percent", 0)
+
         return sorted(matches, key=lambda x: x.get("match_score", 0), reverse=True)
+
     except Exception as e:
         print("[Job Matching Agent] GPT-4o parse error:", e)
         for match in matches:
-            match["match_score"] = match.get("similarity_score", 0)
+            sim = match.get("similarity_score", 0)
+            if isinstance(sim, float) and sim <= 1.0:
+                sim = round(sim * 100)
+            match["match_score"] = sim if sim > 0 else 50
             match["why_this_fits"] = "Match based on vector similarity"
             match["skill_overlap"] = []
             match["missing_skills"] = []
