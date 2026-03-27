@@ -31,10 +31,10 @@ app.add_middleware(
 # Routes
 app.include_router(resume.router)
 app.include_router(jobs.router)
+app.include_router(mentor_match_router)
 app.include_router(mentors.router)
 app.include_router(skills.router)
 app.include_router(progress.router)
-app.include_router(mentor_match_router)
 app.include_router(mentor_profile_router)  # ← FIXED: now after app = FastAPI()
 
 @app.get("/")

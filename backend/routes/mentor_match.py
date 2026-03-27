@@ -3,21 +3,19 @@ from fastapi import APIRouter, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
 from qdrant_client import QdrantClient
 from openai import OpenAI
+from datetime import datetime
 
 router = APIRouter()
 
-# Clients
 mongo_client = AsyncIOMotorClient(os.environ.get("MONGODB_URI"))
 db = mongo_client[os.environ.get("MONGODB_DB_NAME", "s3_dashboard")]
-ai_profiles_collection = db["ai_profiles"]  # ← students live here
+ai_profiles_collection = db["ai_profiles"]
 
 qdrant = QdrantClient(
     url=os.environ.get("QDRANT_URL"),
     api_key=os.environ.get("QDRANT_API_KEY")
 )
-
 openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
-
 COLLECTION_NAME = "mentors"
 
 
@@ -35,7 +33,6 @@ def build_student_query_text(ai_profile: dict) -> str:
     goals = ai_profile.get("career_goals", "")
     experience = ai_profile.get("experience_level", "")
     summary = ai_profile.get("summary", "")
-
     return f"""
     Student Summary: {summary}
     Skills: {skills}
@@ -68,7 +65,6 @@ In 2-3 sentences, explain specifically why this mentor is a great match for this
 Be specific about overlapping skills, domain alignment, and career growth potential.
 Keep it encouraging and professional.
     """
-
     response = openai_client.chat.completions.create(
         model="gpt-4o",
         messages=[{"role": "user", "content": prompt}],
@@ -78,43 +74,55 @@ Keep it encouraging and professional.
     return response.choices[0].message.content.strip()
 
 
-@router.get("/mentors/match")
-async def match_mentors(user_id: str):
-    # Step 1 — Fetch student from ai_profiles collection
+# ── FAST: reads saved results from MongoDB, no agent runs ──────────────
+@router.get("/mentors/cached")
+async def get_cached_mentors(user_id: str):
     student_doc = await ai_profiles_collection.find_one({"user_id": user_id})
-
     if not student_doc:
-        raise HTTPException(status_code=404, detail=f"No profile found for user_id: {user_id}. Upload resume first.")
+        raise HTTPException(status_code=404, detail="No profile found.")
 
-    # Step 2 — Get aiProfile
-    ai_profile = student_doc.get("profile", {})
-    if not ai_profile or not ai_profile.get("skills"):
+    cached = student_doc.get("mentor_matches")
+    if not cached:
         raise HTTPException(
-            status_code=400,
-            detail="Student profile has no skills. Please complete resume parsing first."
+            status_code=404,
+            detail="No mentor matches yet. Click 'Find Mentors' to run matching."
         )
 
-    # Step 3 — Embed student query
+    return {
+        "user_id": user_id,
+        "total_matches": len(cached),
+        "mentors": cached,
+        "cached_at": student_doc.get("mentor_matches_at")
+    }
+
+
+# ── SLOW: runs full Qdrant + GPT-4o agent, saves results ───────────────
+@router.get("/mentors/match")
+async def match_mentors(user_id: str):
+    student_doc = await ai_profiles_collection.find_one({"user_id": user_id})
+    if not student_doc:
+        raise HTTPException(status_code=404, detail=f"No profile found for user_id: {user_id}.")
+
+    ai_profile = student_doc.get("profile", {})
+    if not ai_profile or not ai_profile.get("skills"):
+        raise HTTPException(status_code=400, detail="No skills found. Upload resume first.")
+
     query_text = build_student_query_text(ai_profile)
     query_vector = get_embedding(query_text)
 
-    # Step 4 — Search Qdrant for top 5 mentors
     search_results = qdrant.search(
         collection_name=COLLECTION_NAME,
         query_vector=query_vector,
         limit=5,
         with_payload=True
     )
-
     if not search_results:
-        raise HTTPException(status_code=404, detail="No mentors found in Qdrant")
+        raise HTTPException(status_code=404, detail="No mentors found in Qdrant.")
 
-    # Step 5 — Build response with GPT-4o explanations
     matched_mentors = []
     for result in search_results:
         mentor_data = result.payload
         explanation = explain_mentor_match(ai_profile, mentor_data)
-
         matched_mentors.append({
             "name": mentor_data.get("name"),
             "email": mentor_data.get("email"),
@@ -126,9 +134,20 @@ async def match_mentors(user_id: str):
             "years_experience": mentor_data.get("years_experience"),
             "linkedin": mentor_data.get("linkedin"),
             "bio": mentor_data.get("bio"),
+            "availability": mentor_data.get("availability", []),
             "match_score": round(result.score * 100, 1),
             "why_match": explanation
         })
+
+    # Save full results so /mentors/cached can serve them instantly next time
+    await ai_profiles_collection.update_one(
+        {"user_id": user_id},
+        {"$set": {
+            "mentor_matches": matched_mentors,
+            "mentor_count": len(matched_mentors),
+            "mentor_matches_at": datetime.utcnow()
+        }}
+    )
 
     return {
         "user_id": user_id,

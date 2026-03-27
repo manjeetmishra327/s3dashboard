@@ -59,21 +59,22 @@ async def get_progress(user_id: str):
     completion_percent = round((completed / total) * 100, 1) if total > 0 else 0
 
     return {
-        "success": True,
-        "user_id": user_id,
-        "student_name": skill_gap.get("student_name"),
-        "target_role": skill_gap.get("target_role"),
-        "summary": {
-            "total_skills": total,
-            "completed": completed,
-            "learning": learning,
-            "not_started": not_started,
-            "completion_percent": completion_percent,
-            "total_estimated_days": skill_gap.get("total_estimated_days", 0)
-        },
-        "skills": skills_report,
-        "last_updated": profile_doc.get("progress_updated_at")
-    }
+    "success": True,
+    "user_id": user_id,
+    "student_name": skill_gap.get("student_name"),
+    "target_role": skill_gap.get("target_role"),
+    "ai_summary": skill_gap.get("summary", ""),   # ← renamed key
+    "summary": {                                   # ← stats object stays
+        "total_skills": total,
+        "completed": completed,
+        "learning": learning,
+        "not_started": not_started,
+        "completion_percent": completion_percent,
+        "total_estimated_days": skill_gap.get("total_estimated_days", 0)
+    },
+    "skills": skills_report,
+    "last_updated": profile_doc.get("progress_updated_at")
+}
 
 
 @router.post("/update")
