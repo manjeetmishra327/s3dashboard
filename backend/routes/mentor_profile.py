@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, UploadFile, File
 from pydantic import BaseModel
 from typing import List, Optional
 from database.mongo import (
@@ -7,6 +7,8 @@ from database.mongo import (
     get_sessions_for_student, update_session_status
 )
 import os
+import base64
+import httpx
 from qdrant_client import QdrantClient
 from openai import OpenAI
 
@@ -17,6 +19,10 @@ qdrant = QdrantClient(
     api_key=os.environ.get("QDRANT_API_KEY")
 )
 openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+
+CLOUDINARY_CLOUD = os.environ.get("CLOUDINARY_CLOUD_NAME")
+CLOUDINARY_API_KEY = os.environ.get("CLOUDINARY_API_KEY")
+CLOUDINARY_API_SECRET = os.environ.get("CLOUDINARY_API_SECRET")
 
 def get_embedding(text: str) -> list:
     response = openai_client.embeddings.create(
@@ -46,6 +52,7 @@ def embed_mentor_to_qdrant(user_id: str, profile: dict):
         )]
     )
 
+# ── Models ────────────────────────────────────────────
 class MentorProfileSetup(BaseModel):
     name: str
     domain: str
@@ -55,7 +62,13 @@ class MentorProfileSetup(BaseModel):
     current_company: str
     years_experience: int
     bio: str
-    availability: List[dict]  # [{day: "Monday", slots: ["10:00", "14:00"]}]
+    availability: List[dict]
+    # NEW social + photo fields
+    linkedin: Optional[str] = None
+    twitter: Optional[str] = None
+    github: Optional[str] = None
+    website: Optional[str] = None
+    photo: Optional[str] = None   # Cloudinary URL stored here
 
 class SessionRequest(BaseModel):
     mentor_id: str
@@ -71,7 +84,47 @@ class SessionResponse(BaseModel):
     status: str
     meeting_link: Optional[str] = None
 
-# ── Setup mentor profile ──────────────────────────────
+# ── Upload photo to Cloudinary ────────────────────────
+@router.post("/upload-photo")
+async def upload_photo(
+    user_id: str = Query(...),
+    file: UploadFile = File(...)
+):
+    if not CLOUDINARY_CLOUD:
+        raise HTTPException(500, "Cloudinary not configured")
+
+    allowed = ["image/jpeg", "image/png", "image/webp"]
+    if file.content_type not in allowed:
+        raise HTTPException(400, "Only JPG, PNG, or WebP images allowed")
+
+    contents = await file.read()
+    if len(contents) > 5 * 1024 * 1024:
+        raise HTTPException(400, "Image too large. Max 5MB.")
+
+    # Upload to Cloudinary via REST API
+    b64 = base64.b64encode(contents).decode()
+    data_uri = f"data:{file.content_type};base64,{b64}"
+
+    async with httpx.AsyncClient() as client:
+        res = await client.post(
+            f"https://api.cloudinary.com/v1_1/{CLOUDINARY_CLOUD}/image/upload",
+            data={
+                "file": data_uri,
+                "upload_preset": "mentor_photos",
+                "public_id": f"mentor_{user_id}",
+                "overwrite": "true",
+            },
+            auth=(CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET),
+            timeout=30
+        )
+
+    if res.status_code != 200:
+        raise HTTPException(500, f"Cloudinary upload failed: {res.text}")
+
+    photo_url = res.json().get("secure_url")
+    return {"success": True, "photo_url": photo_url}
+
+# ── Setup / update mentor profile ────────────────────
 @router.post("/setup")
 async def setup_mentor_profile(
     user_id: str = Query(...),
@@ -80,7 +133,6 @@ async def setup_mentor_profile(
     data = profile.dict()
     data["is_active"] = True
     await save_mentor_profile(user_id, data)
-    # Embed into Qdrant so students can match
     try:
         embed_mentor_to_qdrant(user_id, data)
         print(f"[Mentor] Embedded {data['name']} into Qdrant")
@@ -118,7 +170,7 @@ async def get_my_sessions(student_id: str = Query(...)):
 @router.post("/session/respond")
 async def respond_to_session(
     session_id: str = Query(...),
-    status: str = Query(...),  # "accepted" or "declined"
+    status: str = Query(...),
     meeting_link: Optional[str] = Query(None)
 ):
     if status not in ["accepted", "declined"]:
