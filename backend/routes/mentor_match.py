@@ -74,7 +74,7 @@ Keep it encouraging and professional.
     return response.choices[0].message.content.strip()
 
 
-# ── FAST: reads saved results from MongoDB, no agent runs ──────────────
+# ── FAST: reads saved results from MongoDB ─────────────────────────────
 @router.get("/mentors/cached")
 async def get_cached_mentors(user_id: str):
     student_doc = await ai_profiles_collection.find_one({"user_id": user_id})
@@ -124,27 +124,25 @@ async def match_mentors(user_id: str):
         mentor_data = result.payload
         explanation = explain_mentor_match(ai_profile, mentor_data)
         matched_mentors.append({
-         "name": mentor_data.get("name"),
-         "email": mentor_data.get("email"),
-         "domain": mentor_data.get("domain"),
-         "skills": mentor_data.get("skills", []),
-         "expertise": mentor_data.get("expertise", []),
-         "current_role": mentor_data.get("current_role"),
-         "current_company": mentor_data.get("current_company"),
-         "years_experience": mentor_data.get("years_experience"),
-         "bio": mentor_data.get("bio"),
-         "availability": mentor_data.get("availability", []),
-         # Social links
-         "linkedin": mentor_data.get("linkedin"),
-         "twitter": mentor_data.get("twitter"),
-         "github": mentor_data.get("github"),
-         "website": mentor_data.get("website"),
-         "photo": mentor_data.get("photo"),
-         "match_score": round(result.score * 100, 1),
-         "why_match": explanation
-})
+            "mongo_id": mentor_data.get("mongo_id"),      # ← FIX: was missing
+            "user_id": mentor_data.get("user_id", ""),    # ← FIX: was missing
+            "name": mentor_data.get("name"),
+            "email": mentor_data.get("email"),
+            "domain": mentor_data.get("domain"),
+            "skills": mentor_data.get("skills", []),
+            "expertise": mentor_data.get("expertise", []),
+            "current_role": mentor_data.get("current_role"),
+            "current_company": mentor_data.get("current_company"),
+            "years_experience": mentor_data.get("years_experience"),
+            "linkedin": mentor_data.get("linkedin"),
+            "bio": mentor_data.get("bio"),
+            "availability": mentor_data.get("availability", []),
+            "calendly_url": mentor_data.get("calendly_url", ""),  # ← for Phase 3
+            "match_score": round(result.score * 100, 1),
+            "why_match": explanation
+        })
 
-    # Save full results so /mentors/cached can serve them instantly next time
+    # Save full results + count so dashboard + cached endpoint work instantly
     await ai_profiles_collection.update_one(
         {"user_id": user_id},
         {"$set": {

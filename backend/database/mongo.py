@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
 
-# Use os.environ directly (loaded by run.py)
 MONGODB_URI = os.environ.get("MONGODB_URI")
 MONGODB_DB_NAME = os.environ.get("MONGODB_DB_NAME", "s3_dashboard")
 
@@ -153,24 +152,37 @@ async def save_session_request(session: dict) -> str:
         raise Exception(f"Session save failed: {str(e)}")
 
 
+def _serialize_session(doc: dict) -> dict:
+    """Convert MongoDB doc to JSON-serializable dict with session_id."""
+    if doc is None:
+        return {}
+    doc["session_id"] = str(doc.pop("_id"))  # rename _id → session_id
+    return doc
+
+
 async def get_sessions_for_mentor(mentor_id: str) -> list:
+    """
+    Query sessions where mentor_id matches.
+    Tries both the stored mongo_id AND email to handle legacy data.
+    """
     try:
-        cursor = sessions_collection.find(
-            {"mentor_id": mentor_id},
-            {"_id": 0}
-        )
-        return await cursor.to_list(length=100)
+        cursor = sessions_collection.find({
+            "$or": [
+                {"mentor_id": mentor_id},
+                {"mentor_user_id": mentor_id},  # new field added in route
+            ]
+        })
+        docs = await cursor.to_list(length=100)
+        return [_serialize_session(doc) for doc in docs]
     except Exception as e:
         raise Exception(f"Sessions fetch failed: {str(e)}")
 
 
 async def get_sessions_for_student(student_id: str) -> list:
     try:
-        cursor = sessions_collection.find(
-            {"student_id": student_id},
-            {"_id": 0}
-        )
-        return await cursor.to_list(length=100)
+        cursor = sessions_collection.find({"student_id": student_id})
+        docs = await cursor.to_list(length=100)
+        return [_serialize_session(doc) for doc in docs]
     except Exception as e:
         raise Exception(f"Sessions fetch failed: {str(e)}")
 
