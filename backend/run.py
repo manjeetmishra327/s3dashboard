@@ -8,12 +8,12 @@ with open(env_path) as f:
             k, v = line.split('=', 1)
             os.environ[k.strip()] = v.strip()
 
-print('[Run] OpenAI:', 'OK' if os.environ.get('OPENAI_API_KEY') else 'MISSING')
-print('[Run] RapidAPI:', 'OK' if os.environ.get('RAPIDAPI_KEY') else 'MISSING')
-print('[Run] MongoDB:', 'OK' if os.environ.get('MONGODB_URI') else 'MISSING')
-print('[Run] Qdrant:', 'OK' if os.environ.get('QDRANT_URL') else 'MISSING')
+print("[Run] OpenAI Key:", "OK" if os.environ.get('OPENAI_API_KEY') else "MISSING")
+print("[Run] MongoDB URI:", "OK" if os.environ.get('MONGODB_URI') else "MISSING")
+print("[Run] RapidAPI Key:", "OK" if os.environ.get('RAPIDAPI_KEY') else "MISSING")
+print("[Run] Qdrant URL:", "OK" if os.environ.get('QDRANT_URL') else "MISSING")
 
 import uvicorn
 
-if __name__ == '__main__':
-    uvicorn.run('main:app', host='0.0.0.0', port=8000, reload=False)
+if __name__ == "__main__":
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=False)
