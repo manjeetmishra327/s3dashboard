@@ -121,9 +121,7 @@ async def match_mentors(user_id: str):
 
     print(f"[Mentor Match] Found {len(active_mentors)} active mentors in MongoDB")
 
-    # Build a set of active mentor user_ids for fast lookup
-    active_user_ids = {str(m.get("user_id")) for m in active_mentors}
-    # Also build a lookup dict by user_id for merging fresh DB data
+    # Build lookup dict by user_id for cross-checking
     active_mentor_map = {str(m.get("user_id")): m for m in active_mentors}
 
     # 3. Check if Qdrant mentors collection has any vectors
@@ -135,11 +133,16 @@ async def match_mentors(user_id: str):
         total_vectors = 0
 
     matched_mentors = []
+    seen_user_ids = set()  # ← deduplication tracker
 
     if total_vectors == 0:
         # No vectors in Qdrant — fall back to returning active MongoDB mentors directly
         print("[Mentor Match] No Qdrant vectors — using MongoDB mentors directly")
         for mentor_data in active_mentors[:5]:
+            mentor_uid = str(mentor_data.get("user_id"))
+            if mentor_uid in seen_user_ids:
+                continue
+            seen_user_ids.add(mentor_uid)
             try:
                 explanation = explain_mentor_match(ai_profile, mentor_data)
             except Exception:
@@ -168,7 +171,7 @@ async def match_mentors(user_id: str):
         search_results = qdrant.search(
             collection_name=COLLECTION_NAME,
             query_vector=query_vector,
-            limit=20,  # fetch more so we have enough after filtering
+            limit=20,  # fetch more so we have enough after filtering + dedup
             with_payload=True
         )
 
@@ -188,7 +191,6 @@ async def match_mentors(user_id: str):
             if qdrant_user_id in active_mentor_map:
                 real_mentor = active_mentor_map[qdrant_user_id]
             else:
-                # Try matching by email
                 for m in active_mentors:
                     if str(m.get("email", "")) == qdrant_email:
                         real_mentor = m
@@ -197,6 +199,14 @@ async def match_mentors(user_id: str):
             if not real_mentor:
                 print(f"[Mentor Match] Skipping '{mentor_data.get('name')}' — not found or inactive in MongoDB")
                 continue
+
+            # ── Deduplication — skip if same mentor already added ──────
+            mentor_uid = str(real_mentor.get("user_id"))
+            if mentor_uid in seen_user_ids:
+                print(f"[Mentor Match] Skipping duplicate '{real_mentor.get('name')}'")
+                continue
+            seen_user_ids.add(mentor_uid)
+            # ───────────────────────────────────────────────────────────
 
             # Use fresh data from MongoDB (not stale Qdrant payload)
             try:
@@ -222,7 +232,7 @@ async def match_mentors(user_id: str):
             })
 
             if len(matched_mentors) >= 5:
-                break  # max 5 matches
+                break  # max 5 unique matches
 
     if not matched_mentors:
         raise HTTPException(
@@ -230,7 +240,7 @@ async def match_mentors(user_id: str):
             detail="No active mentors match your profile yet. Check back soon!"
         )
 
-    print(f"[Mentor Match] Returning {len(matched_mentors)} verified real mentors")
+    print(f"[Mentor Match] Returning {len(matched_mentors)} verified unique real mentors")
 
     # 6. Save to MongoDB cache
     await ai_profiles_collection.update_one(
