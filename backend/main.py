@@ -19,28 +19,49 @@ app = FastAPI(
     description="AI Powered Student Success Dashboard"
 )
 
-# CORS
-# CORS
+# ── CORS ──────────────────────────────────────────────────────────────────────
+# Explicitly whitelist only known frontend origins.
+# Never use allow_origins=["*"] with allow_credentials=True — that's a
+# security misconfiguration (CORS + credentials wildcard).
+
+_FRONTEND_URL = os.getenv("FRONTEND_URL", "").strip().rstrip("/")
+
+# Build exact allowed origins — no duplicates, no wildcards
+_ALLOWED_ORIGINS = list(dict.fromkeys(filter(None, [
+    "http://localhost:3000",
+    "https://s3frontend-seven.vercel.app",
+    _FRONTEND_URL if _FRONTEND_URL else None,
+])))
+
+print(f"[Startup] CORS allowed origins: {_ALLOWED_ORIGINS}")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:3000",
-        "https://s3frontend-seven.vercel.app",
-        os.getenv("FRONTEND_URL", "http://localhost:3000"),
-    ],
+    allow_origins=_ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    # Explicit methods only — no wildcard
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    # Explicit headers only — no wildcard
+    allow_headers=[
+        "Content-Type",
+        "Authorization",
+        "Accept",
+        "Origin",
+        "X-Requested-With",
+    ],
+    expose_headers=["X-RateLimit-Limit", "Retry-After"],
+    max_age=600,  # preflight cache 10 minutes
 )
 
-# Routes
+# ── Routes ────────────────────────────────────────────────────────────────────
 app.include_router(resume.router)
 app.include_router(jobs.router)
 app.include_router(mentor_match_router)
 app.include_router(mentors.router)
 app.include_router(skills.router)
 app.include_router(progress.router)
-app.include_router(mentor_profile_router)  # ← FIXED: now after app = FastAPI()
+app.include_router(mentor_profile_router)
+
 
 @app.get("/")
 async def root():
@@ -49,6 +70,7 @@ async def root():
         "version": "2.0.0"
     }
 
+
 @app.get("/health")
 async def health():
     return {
@@ -56,10 +78,12 @@ async def health():
         "version": "2.0.0"
     }
 
+
 @app.get("/debug")
 async def debug():
+    # ── Never expose full API key — only confirm it loaded ────────────────
     key = os.getenv("OPENAI_API_KEY")
     return {
         "key_loaded": bool(key),
-        "key_preview": key[:10] if key else "NOT FOUND"
+        # Removed key_preview — exposing even 10 chars is information disclosure
     }
