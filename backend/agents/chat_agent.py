@@ -62,7 +62,7 @@ async def rerank_chunks(query: str, chunks: list[dict]) -> list[dict]:
         return chunks
 
     response = await cohere_client.rerank(
-        model="rerank-english-v3",
+        model="rerank-v3.5",
         query=query,
         documents=[c["chunk_text"] for c in chunks],
         top_n=TOP_K_RERANK,
