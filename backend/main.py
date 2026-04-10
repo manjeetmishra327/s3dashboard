@@ -49,6 +49,7 @@ app.add_middleware(
         "Accept",
         "Origin",
         "X-Requested-With",
+        "Cache-Control",
     ],
     expose_headers=["X-RateLimit-Limit", "Retry-After"],
     max_age=600,  # preflight cache 10 minutes
