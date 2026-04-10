@@ -24,6 +24,26 @@ async def skill_gap(user_id: str):
         }}
     )
 
+    # ── Auto-ingest skill gaps into RAG vector store ──────────────────────────
+    try:
+        from vectorstore.chat_store import ingest_skill_gaps
+        data = result["data"]
+        # Handle both list and dict shapes from skill_gap_agent
+        if isinstance(data, list):
+            gaps_list = data
+        else:
+            gaps_list = (
+                data.get("gaps")
+                or data.get("skill_gaps")
+                or data.get("skills")
+                or []
+            )
+        ingest_skill_gaps(user_id, gaps_list)
+        print(f"[Skills] RAG ingestion complete for user: {user_id}")
+    except Exception as e:
+        print(f"[Skills] RAG ingestion failed (non-fatal): {e}")
+    # ─────────────────────────────────────────────────────────────────────────
+
     return {
         "success": True,
         "user_id": user_id,

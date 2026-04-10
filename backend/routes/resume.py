@@ -25,6 +25,15 @@ async def parse_resume(
     if not result["success"]:
         raise HTTPException(500, result.get("error", "Parsing failed"))
 
+    # ── Auto-ingest resume into RAG vector store ──────────────────────────────
+    try:
+        from vectorstore.chat_store import ingest_resume
+        ingest_resume(user_id, result["profile"])
+        print(f"[Resume] RAG ingestion complete for user: {user_id}")
+    except Exception as e:
+        print(f"[Resume] RAG ingestion failed (non-fatal): {e}")
+    # ─────────────────────────────────────────────────────────────────────────
+
     return result
 
 

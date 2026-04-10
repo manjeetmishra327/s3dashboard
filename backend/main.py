@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from routes import resume, jobs, mentors, skills, progress
 from routes.mentor_match import router as mentor_match_router
 from routes.mentor_profile import router as mentor_profile_router
+from routes.chat import router as chat_router
 
 app = FastAPI(
     title="S3 Dashboard API",
@@ -61,6 +62,7 @@ app.include_router(mentors.router)
 app.include_router(skills.router)
 app.include_router(progress.router)
 app.include_router(mentor_profile_router)
+app.include_router(chat_router)
 
 
 @app.get("/")

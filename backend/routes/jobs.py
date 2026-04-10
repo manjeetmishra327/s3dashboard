@@ -74,15 +74,27 @@ async def match_jobs(user_id: str = Query(...)):
     if not result["success"]:
         raise HTTPException(500, result.get("error", "Matching failed"))
 
+    matches = result.get("matches", [])
+
     # Save matches to MongoDB
     await _profiles.update_one(
         {"user_id": user_id},
         {"$set": {
-            "job_matches": result.get("matches", []),
+            "job_matches": matches,
             "job_matches_total_scraped": result.get("total_jobs_scanned", 0),
             "job_matches_at": datetime.utcnow()
         }}
     )
+
+    # ── Auto-ingest job matches into RAG vector store ─────────────────────────
+    try:
+        from vectorstore.chat_store import ingest_jobs
+        ingest_jobs(user_id, matches)
+        print(f"[Jobs] RAG ingestion complete for user: {user_id}")
+    except Exception as e:
+        print(f"[Jobs] RAG ingestion failed (non-fatal): {e}")
+    # ─────────────────────────────────────────────────────────────────────────
+
     return result
 
 
@@ -116,6 +128,15 @@ async def scrape_and_match(user_id: str = Query(...)):
         }}
     )
     print(f"[Jobs] Saved {len(matches)} matches to MongoDB for user: {user_id}")
+
+    # ── Auto-ingest job matches into RAG vector store ─────────────────────────
+    try:
+        from vectorstore.chat_store import ingest_jobs
+        ingest_jobs(user_id, matches)
+        print(f"[Jobs] RAG ingestion complete for user: {user_id}")
+    except Exception as e:
+        print(f"[Jobs] RAG ingestion failed (non-fatal): {e}")
+    # ─────────────────────────────────────────────────────────────────────────
 
     return {
         "success": True,
