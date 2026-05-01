@@ -83,12 +83,13 @@ def build_system_prompt(user_name: str, summary: str, context_text: str) -> str:
     from datetime import date
     today = date.today().strftime("%A, %B %d, %Y")
 
+    summary_section = f"## Conversation summary\n{summary}\n" if summary else ""
+
     return f"""You are an advanced AI career coach for {user_name or 'the user'}. Today is {today}.
 
 Give deeply personalized, actionable career guidance grounded in the user's actual resume, job matches, and skill gap data. Every answer must reference their specific experience — never give generic advice.
 
-{f"## Conversation summary\n{summary}\n" if summary else ""}
-
+{summary_section}
 ## Retrieved context from user's career data
 {context_text or "No context retrieved. Ask the user to upload their resume and run job matches first."}
 
