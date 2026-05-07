@@ -37,6 +37,8 @@ class StartRequest(BaseModel):
     interview_type: str = Field(..., description="dsa | system_design | hr | mixed")
     total_questions: int = Field(DEFAULT_QUESTIONS, ge=MIN_QUESTIONS, le=MAX_QUESTIONS)
     job_description: Optional[str] = Field(None, max_length=3000)
+    experience_level: str = Field("junior", description="fresher|junior|mid|senior")  # ADD
+    company_tier: str = Field("any", description="faang|product|service|any")         # ADD
 
     @validator("interview_type")
     def validate_type(cls, v):
@@ -114,6 +116,8 @@ async def start_interview(
             previous_questions=[],
             question_number=1,
             total_questions=body.total_questions,
+            experience_level=body.experience_level,  
+            company_tier=body.company_tier,           
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
@@ -125,6 +129,8 @@ async def start_interview(
         "interview_type": body.interview_type,
         "total_questions": body.total_questions,
         "job_description": body.job_description or "",
+        "experience_level": body.experience_level,   
+        "company_tier": body.company_tier, 
         "resume_snapshot": resume_text[:500],  # small snapshot only
         "status": "active",
         "questions": [first_question],
@@ -180,6 +186,7 @@ async def submit_answer(
             expected_keywords=target_q.get("expected_keywords", []),
             hint_for_evaluator=target_q.get("hint_for_evaluator", ""),
             difficulty=target_q.get("difficulty", "medium"),
+            experience_level=session.get("experience_level", "junior"),
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
@@ -206,6 +213,8 @@ async def submit_answer(
             report = await generate_report({
                 "questions": updated_questions,
                 "interview_type": session["interview_type"],
+                "experience_level": session.get("experience_level", "junior"),
+      "company_tier": session.get("company_tier", "any"),
             })
         except Exception as e:
             logger.error(f"Report generation error: {e}")
@@ -245,6 +254,8 @@ async def submit_answer(
             previous_questions=previous_questions,
             question_number=next_q_number,
             total_questions=total_questions,
+            experience_level=session.get("experience_level", "junior"), 
+            company_tier=session.get("company_tier", "any"),
         )
     except RuntimeError as e:
         raise HTTPException(status_code=503, detail=str(e))
