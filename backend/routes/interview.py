@@ -10,17 +10,17 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Depends, Request, status
+from fastapi import APIRouter, HTTPException, Query, status
 from pydantic import BaseModel, Field, validator
 
-from database.mongo import get_database
+from database.mongo import db
 from agents.interview_agent import (
     generate_question,
     evaluate_answer,
     generate_report,
     INTERVIEW_CONFIGS,
 )
-from routes.resume import get_current_user  # reuse existing JWT util
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/interview", tags=["interview"])
@@ -92,11 +92,11 @@ async def _get_resume_text(db, user_id: str) -> str:
 @router.post("/start", status_code=status.HTTP_201_CREATED)
 async def start_interview(
     body: StartRequest,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Query(..., description="User ID from auth"),
 ):
     """Create a new interview session and return the first question."""
-    db = await get_database()
-    user_id = str(current_user["_id"])
+
+
 
     # Abort any stale active session for this user + type (optional cleanup)
     await db[COLLECTION].update_many(
@@ -151,14 +151,14 @@ async def start_interview(
 @router.post("/answer")
 async def submit_answer(
     body: AnswerRequest,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Query(..., description="User ID from auth"),
 ):
     """
     Score the submitted answer and return the next question (if any)
     or trigger report generation when all questions are answered.
     """
-    db = await get_database()
-    user_id = str(current_user["_id"])
+
+
     session = await _get_active_session(db, body.session_id, user_id)
 
     questions: list = session.get("questions", [])
@@ -275,11 +275,11 @@ async def submit_answer(
 @router.get("/report/{session_id}")
 async def get_report(
     session_id: str,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Query(..., description="User ID from auth"),
 ):
     """Fetch completed interview report."""
-    db = await get_database()
-    user_id = str(current_user["_id"])
+
+
 
     session = await db[COLLECTION].find_one(
         {"session_id": session_id, "user_id": user_id}
@@ -304,13 +304,13 @@ async def get_report(
 
 @router.get("/sessions")
 async def list_sessions(
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Query(..., description="User ID from auth"),
     limit: int = 10,
     skip: int = 0,
 ):
     """List all past interview sessions for the user (newest first)."""
-    db = await get_database()
-    user_id = str(current_user["_id"])
+
+
 
     limit = min(limit, 20)  # cap at 20
 
@@ -350,11 +350,11 @@ async def list_sessions(
 @router.post("/abandon")
 async def abandon_session(
     body: AbandonRequest,
-    current_user: dict = Depends(get_current_user),
+    user_id: str = Query(..., description="User ID from auth"),
 ):
     """Mark an active session as abandoned."""
-    db = await get_database()
-    user_id = str(current_user["_id"])
+
+
 
     result = await db[COLLECTION].update_one(
         {"session_id": body.session_id, "user_id": user_id, "status": "active"},
