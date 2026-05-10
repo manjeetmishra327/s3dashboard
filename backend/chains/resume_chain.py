@@ -11,11 +11,6 @@ OPENAI_KEY = os.getenv("OPENAI_API_KEY")
 
 print(f"[Resume Chain] Key check: {'✅' if OPENAI_KEY else '❌ NOT FOUND'}")
 
-# ── IMPORTANT: All literal {{ }} in the JSON schema are ESCAPED ───────────────
-# LangChain PromptTemplate treats single {var} as variables.
-# To include literal braces in the prompt, use {{ and }} everywhere
-# except the actual variable {resume_text}.
-
 RESUME_PROMPT = """You are a world-class Senior Technical Recruiter and Career Coach with 15+ years of experience evaluating resumes across top tech companies (Google, Microsoft, Amazon, startups).
 
 Your job is to perform a DEEP, HONEST, CRITICAL analysis of the resume below. Do NOT give inflated scores. Be brutally accurate.
@@ -151,7 +146,7 @@ def get_resume_chain():
 
     llm = ChatOpenAI(
         model="gpt-4o",
-        temperature=0,
+        temperature=0.2,   # ✅ FIXED: was 0 (caused anchoring bias → always 68)
         api_key=OPENAI_KEY
     )
 
