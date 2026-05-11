@@ -208,7 +208,7 @@ async def submit_answer(
     is_complete = answered_count >= total_questions
 
     if is_complete:
-        # Generate final report
+        
         try:
             report = await generate_report({
                 "questions": updated_questions,
