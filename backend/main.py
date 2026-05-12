@@ -15,6 +15,7 @@ from routes.mentor_profile import router as mentor_profile_router
 from routes.chat import router as chat_router
 from routes.interview import router as interview_router
 from routes.resume_v2 import router as resume_v2_router
+from routes.roadmap_routes import router as roadmap_router
 
 app = FastAPI(
     title="S3 Dashboard API",
@@ -68,6 +69,7 @@ app.include_router(mentor_profile_router)
 app.include_router(chat_router)
 app.include_router(interview_router)
 app.include_router(resume_v2_router)
+app.include_router(roadmap_router)
 
 
 @app.get("/")
