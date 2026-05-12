@@ -2,7 +2,7 @@ import os
 import json
 import httpx
 from openai import AsyncOpenAI
-from database.mongo import get_db
+from database.mongo import db  # ✅ FIXED: direct db import, no get_db()
 from dotenv import load_dotenv
 from datetime import datetime
 
@@ -10,7 +10,7 @@ load_dotenv()
 client      = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 JSEARCH_KEY = os.getenv("JSEARCH_API_KEY")
 
-# ─── Verified Resource Map (zero hallucinated URLs) ───────────────────────────
+# ─── Verified Resource Map (zero hallucinated URLs) ──────────────────────────
 RESOURCES = {
     "javascript":    {"name": "JavaScript.info",            "url": "https://javascript.info"},
     "typescript":    {"name": "TypeScript Handbook",        "url": "https://www.typescriptlang.org/docs/handbook/intro.html"},
@@ -56,11 +56,6 @@ def get_resource(key: str) -> dict:
 
 # ─── Step 1: Fetch real market demand via JSearch ────────────────────────────
 async def fetch_market_skills(target_role: str) -> dict:
-    """
-    Hits JSearch API to find top 20 real job postings for target role.
-    Counts keyword frequency to rank skills by actual market demand.
-    Returns: { "skill": demand_score (0-100), ... }
-    """
     if not JSEARCH_KEY:
         return {}
 
@@ -88,7 +83,6 @@ async def fetch_market_skills(target_role: str) -> dict:
         if not jobs:
             return {}
 
-        # Count skill mentions across all job descriptions
         combined_text = " ".join([
             (j.get("job_description", "") + " " + j.get("job_title", "")).lower()
             for j in jobs[:20]
@@ -113,12 +107,11 @@ async def fetch_market_skills(target_role: str) -> dict:
         return {}
 
 
-# ─── Step 2: Load full user context from MongoDB ──────────────────────────────
+# ─── Step 2: Load full user context from MongoDB ─────────────────────────────
 async def load_user_context(user_id: str) -> dict:
-    db = await get_db()
-
-    profile   = await db.ai_profiles.find_one({"user_id": user_id}) or {}
-    skill_gap = await db.skill_gap_results.find_one({"user_id": user_id}) or {}
+    # ✅ FIXED: using global db directly, no get_db()
+    profile   = await db["ai_profiles"].find_one({"user_id": user_id}) or {}
+    skill_gap = await db["skill_gap_results"].find_one({"user_id": user_id}) or {}
 
     gaps = []
     if skill_gap.get("gaps"):
@@ -138,18 +131,18 @@ async def load_user_context(user_id: str) -> dict:
     }
 
 
-# ─── Step 3: Generate roadmap with GPT-4o ─────────────────────────────────────
-ROADMAP_SYSTEM = """You are a world-class career coach who creates precise, 
-personalized 3-month tech career roadmaps. You understand skill dependencies 
-(learn JavaScript before React), realistic time estimates, and what hiring 
-managers actually look for. Your roadmaps are specific, actionable, and sequenced 
-perfectly — not generic advice."""
+# ─── Step 3: Generate roadmap with GPT-4o ────────────────────────────────────
+ROADMAP_SYSTEM = """You are a world-class career coach who creates precise,
+personalized 3-month tech career roadmaps. You understand skill dependencies
+(learn JavaScript before React), realistic time estimates, and what hiring
+managers actually look for. Your roadmaps are specific, actionable, and sequenced
+perfectly – not generic advice."""
 
 ROADMAP_PROMPT = """Create a highly personalized 3-month career roadmap.
 
 PERSON'S PROFILE:
 - Name: {name}
-- Target Role: {target_role}  
+- Target Role: {target_role}
 - Experience Level: {experience_level} ({experience_years} years)
 - Current Skills: {current_skills}
 - Critical Skill Gaps: {skill_gaps}
@@ -167,9 +160,9 @@ ROADMAP PHILOSOPHY:
 - Prioritize skills with highest market demand score above
 - Respect prerequisites: JavaScript before React, Python before FastAPI, etc.
 
-For resource_key, use ONLY these exact strings: javascript, typescript, react, nextjs, vue, 
-angular, css, tailwind, python, fastapi, django, flask, nodejs, express, mongodb, postgresql, 
-sql, redis, docker, kubernetes, aws, gcp, git, cicd, dsa, system_design, ml, langchain, 
+For resource_key, use ONLY these exact strings: javascript, typescript, react, nextjs, vue,
+angular, css, tailwind, python, fastapi, django, flask, nodejs, express, mongodb, postgresql,
+sql, redis, docker, kubernetes, aws, gcp, git, cicd, dsa, system_design, ml, langchain,
 openai_api, interview, linkedin, networking, project, practice
 
 Return ONLY valid JSON (no markdown):
@@ -234,10 +227,10 @@ Return ONLY valid JSON (no markdown):
 }}"""
 
 
-# ─── Step 4: AI Coach (context-aware per task) ────────────────────────────────
-COACH_SYSTEM = """You are an expert technical career coach. You give highly specific, 
-actionable guidance for exactly what the person is asking about. You know their background 
-and give personalized advice — not generic tips."""
+# ─── Step 4: AI Coach (context-aware per task) ───────────────────────────────
+COACH_SYSTEM = """You are an expert technical career coach. You give highly specific,
+actionable guidance for exactly what the person is asking about. You know their background
+and give personalized advice – not generic tips."""
 
 async def run_ai_coach(
     task_title: str,
@@ -247,10 +240,6 @@ async def run_ai_coach(
     current_skills: list,
     experience_level: str,
 ) -> dict:
-    """
-    AI Coach: context-aware assistant for any roadmap task.
-    Answers user questions about a specific task with full context.
-    """
     try:
         prompt = f"""Person is working on this career roadmap task:
 
@@ -262,7 +251,7 @@ THEIR CURRENT SKILLS: {', '.join(current_skills[:10])}
 
 THEIR QUESTION: {user_question}
 
-Give a specific, actionable answer (3-5 sentences max). 
+Give a specific, actionable answer (3-5 sentences max).
 If they're asking what to build, give an exact project idea.
 If they're stuck, give step-by-step guidance.
 If they want more context, explain why this task matters for {target_role}.
@@ -285,16 +274,8 @@ Be direct, practical, encouraging."""
         return {"success": False, "error": str(e)}
 
 
-# ─── Main Agent ────────────────────────────────────────────────────────────────
+# ─── Main Agent ───────────────────────────────────────────────────────────────
 async def run_career_roadmap_agent(user_id: str) -> dict:
-    """
-    Career Roadmap Agent:
-    1. Load user profile + skill gaps from MongoDB
-    2. Fetch real market demand from JSearch
-    3. Generate personalized roadmap with GPT-4o
-    4. Inject verified resource URLs
-    5. Save to MongoDB & return
-    """
     try:
         # 1. Load user context
         ctx = await load_user_context(user_id)
@@ -305,7 +286,7 @@ async def run_career_roadmap_agent(user_id: str) -> dict:
         market_demand = await fetch_market_skills(ctx["target_role"])
         market_str = (
             "\n".join([f"  - {skill}: {score}% demand" for skill, score in list(market_demand.items())[:10]])
-            if market_demand else "  (Market data unavailable — using profile-based priorities)"
+            if market_demand else "  (Market data unavailable – using profile-based priorities)"
         )
 
         # 3. Generate roadmap
@@ -353,9 +334,8 @@ async def run_career_roadmap_agent(user_id: str) -> dict:
         roadmap["market_demand"]    = market_demand
         roadmap["user_context"]     = ctx
 
-        # 5. Save to MongoDB
-        db = await get_db()
-        await db.career_roadmaps.update_one(
+        # 5. Save to MongoDB ✅ FIXED: direct db usage
+        await db["career_roadmaps"].update_one(
             {"user_id": user_id},
             {"$set": roadmap},
             upsert=True
@@ -369,16 +349,15 @@ async def run_career_roadmap_agent(user_id: str) -> dict:
         return {"success": False, "error": str(e)}
 
 
-# ─── Task Completion ───────────────────────────────────────────────────────────
+# ─── Task Completion ──────────────────────────────────────────────────────────
 async def complete_roadmap_task(user_id: str, task_id: str, completed: bool) -> dict:
-    """Mark a task as complete/incomplete and recalculate progress."""
     try:
-        db      = await get_db()
-        roadmap = await db.career_roadmaps.find_one({"user_id": user_id})
+        # ✅ FIXED: direct db usage
+        roadmap = await db["career_roadmaps"].find_one({"user_id": user_id})
         if not roadmap:
             return {"success": False, "error": "No roadmap found"}
 
-        total     = 0
+        total           = 0
         completed_count = 0
 
         for month in roadmap.get("months", []):
@@ -393,20 +372,19 @@ async def complete_roadmap_task(user_id: str, task_id: str, completed: bool) -> 
 
         overall = round((completed_count / total) * 100) if total > 0 else 0
 
-        # Month-level progress
         for month in roadmap.get("months", []):
             month_total = sum(len(w["tasks"]) for w in month.get("weeks", []))
             month_done  = sum(
                 sum(1 for t in w["tasks"] if t["completed"])
                 for w in month.get("weeks", [])
             )
-            month["progress"]          = round((month_done / month_total) * 100) if month_total > 0 else 0
+            month["progress"]           = round((month_done / month_total) * 100) if month_total > 0 else 0
             month["milestone_achieved"] = month["progress"] == 100
 
         roadmap["completed_tasks"]  = completed_count
         roadmap["overall_progress"] = overall
 
-        await db.career_roadmaps.update_one(
+        await db["career_roadmaps"].update_one(
             {"user_id": user_id},
             {"$set": roadmap}
         )
