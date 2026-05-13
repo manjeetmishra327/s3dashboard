@@ -7,12 +7,12 @@ from agents.career_roadmap_agent import (
     run_ai_coach,
     load_user_context,
 )
-from database.mongo import get_db
+from database.mongo import db  # ✅ FIXED: direct db import, no get_db()
 
 router = APIRouter(prefix="/roadmap", tags=["Career Roadmap"])
 
 
-# ─── POST /roadmap/generate ───────────────────────────────────────────────────
+# ─── POST /roadmap/generate ──────────────────────────────────────────────────
 class GenerateRequest(BaseModel):
     user_id: str
 
@@ -25,18 +25,18 @@ async def generate_roadmap(req: GenerateRequest):
     return result
 
 
-# ─── GET /roadmap/{user_id} ───────────────────────────────────────────────────
+# ─── GET /roadmap/{user_id} ──────────────────────────────────────────────────
 @router.get("/{user_id}")
 async def get_roadmap(user_id: str):
     """Fetch saved roadmap for a user."""
-    db      = await get_db()
-    roadmap = await db.career_roadmaps.find_one({"user_id": user_id}, {"_id": 0})
+    # ✅ FIXED: direct db usage, no await get_db()
+    roadmap = await db["career_roadmaps"].find_one({"user_id": user_id}, {"_id": 0})
     if not roadmap:
         return {"success": True, "data": None}
     return {"success": True, "data": roadmap}
 
 
-# ─── PATCH /roadmap/complete-task ─────────────────────────────────────────────
+# ─── PATCH /roadmap/complete-task ────────────────────────────────────────────
 class TaskCompleteRequest(BaseModel):
     user_id:   str
     task_id:   str
@@ -51,7 +51,7 @@ async def complete_task(req: TaskCompleteRequest):
     return result
 
 
-# ─── POST /roadmap/coach ──────────────────────────────────────────────────────
+# ─── POST /roadmap/coach ─────────────────────────────────────────────────────
 class CoachRequest(BaseModel):
     user_id:          str
     task_title:       str
@@ -73,8 +73,3 @@ async def ai_coach(req: CoachRequest):
     if not result["success"]:
         raise HTTPException(status_code=500, detail=result.get("error"))
     return result
-
-
-# ─── Register in main.py ──────────────────────────────────────────────────────
-# from routes.roadmap_routes import router as roadmap_router
-# app.include_router(roadmap_router)
