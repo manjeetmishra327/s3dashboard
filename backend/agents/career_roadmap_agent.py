@@ -2,7 +2,7 @@ import os
 import json
 import httpx
 from openai import AsyncOpenAI
-from database.mongo import db  # ✅ FIXED: direct db import, no get_db()
+from database.mongo import db  
 from dotenv import load_dotenv
 from datetime import datetime
 
