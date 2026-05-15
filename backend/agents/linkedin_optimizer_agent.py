@@ -9,6 +9,19 @@ load_dotenv()
 client = AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 
+# ── Shared JSON parser — strips markdown fences from any GPT response ─────────
+def parse_json_response(raw: str) -> dict:
+    """Strip markdown fences and parse JSON from GPT response."""
+    raw = raw.strip()
+    if raw.startswith("```"):
+        parts = raw.split("```")
+        # parts[1] is the content between first and second ```
+        raw = parts[1]
+        if raw.startswith("json"):
+            raw = raw[4:]
+    return json.loads(raw.strip())
+
+
 SECTION_SCORE_PROMPT = """You are a senior LinkedIn profile strategist and recruiter with 15+ years of experience.
 Analyze this LinkedIn profile and return a JSON object with ONLY these fields:
 
@@ -91,6 +104,8 @@ async def run_linkedin_optimizer_agent(user_id: str, profile_text: str, target_r
     Pass 2: Keyword gap analysis
     Pass 3: Full AI rewrite of all sections
     """
+    score_raw = keyword_raw = rewrite_raw = ""
+
     try:
         # ── Pass 1: Section scoring ──────────────────────────────────────────
         score_response = await client.chat.completions.create(
@@ -106,7 +121,7 @@ async def run_linkedin_optimizer_agent(user_id: str, profile_text: str, target_r
             max_tokens=800,
         )
         score_raw = score_response.choices[0].message.content.strip()
-        score_data = json.loads(score_raw)
+        score_data = parse_json_response(score_raw)
 
         # ── Pass 2: Keyword analysis ─────────────────────────────────────────
         keyword_response = await client.chat.completions.create(
@@ -122,9 +137,9 @@ async def run_linkedin_optimizer_agent(user_id: str, profile_text: str, target_r
             max_tokens=600,
         )
         keyword_raw = keyword_response.choices[0].message.content.strip()
-        keyword_data = json.loads(keyword_raw)
+        keyword_data = parse_json_response(keyword_raw)
 
-        # ── Pass 3: Full rewrite ──────────────────────────────────────────────
+        # ── Pass 3: Full rewrite ─────────────────────────────────────────────
         rewrite_response = await client.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -141,12 +156,7 @@ async def run_linkedin_optimizer_agent(user_id: str, profile_text: str, target_r
             max_tokens=2500,
         )
         rewrite_raw = rewrite_response.choices[0].message.content.strip()
-        # Strip possible markdown fences
-        if rewrite_raw.startswith("```"):
-            rewrite_raw = rewrite_raw.split("```")[1]
-            if rewrite_raw.startswith("json"):
-                rewrite_raw = rewrite_raw[4:]
-        rewrite_data = json.loads(rewrite_raw.strip())
+        rewrite_data = parse_json_response(rewrite_raw)
 
         # ── Persist to MongoDB ────────────────────────────────────────────────
         result_doc = {
@@ -170,8 +180,23 @@ async def run_linkedin_optimizer_agent(user_id: str, profile_text: str, target_r
         }
 
     except json.JSONDecodeError as e:
+        # Log which pass failed and what the raw response looked like
+        print(f"[LinkedIn Agent] JSON parse error: {e}")
+        if not score_raw:
+            failed_at = "Pass 1 (scoring)"
+            raw = score_raw
+        elif not keyword_raw:
+            failed_at = "Pass 2 (keywords)"
+            raw = keyword_raw
+        else:
+            failed_at = "Pass 3 (rewrite)"
+            raw = rewrite_raw
+        print(f"[LinkedIn Agent] Failed at: {failed_at}")
+        print(f"[LinkedIn Agent] Raw response:\n{repr(raw)}")
         return {"success": False, "error": f"JSON parse error in AI response: {str(e)}"}
+
     except Exception as e:
+        print(f"[LinkedIn Agent] Unexpected error: {e}")
         return {"success": False, "error": str(e)}
 
 
