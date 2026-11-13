@@ -41,8 +41,6 @@ async def analyze_resume(
             user_id=user_id,
             job_description=job_description
         )
-        print("[DEBUG] scorer data:", {k: (v if isinstance(v, (int, float, str)) and len(str(v)) < 40 else type(v).__name__) for k, v in result["data"].items()})
-
 
         if not result["success"]:
             raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
