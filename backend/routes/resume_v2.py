@@ -41,6 +41,8 @@ async def analyze_resume(
             user_id=user_id,
             job_description=job_description
         )
+        print("[DEBUG] scorer data:", {k: (v if isinstance(v, (int, float, str)) and len(str(v)) < 40 else type(v).__name__) for k, v in result["data"].items()})
+
 
         if not result["success"]:
             raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
@@ -50,7 +52,7 @@ async def analyze_resume(
             agent_result = await run_resume_agent(file_bytes, user_id)
             if agent_result["success"]:
                 profile = agent_result["profile"]
-                profile["ai_profile_score"] = result["overall_score"]  # see note below
+                profile["ai_profile_score"] = result["data"]["overall_score"]
                 await save_ai_profile(user_id, profile)
                 print(f"[Resume v2] Profile synced for user: {user_id}")
             else:
