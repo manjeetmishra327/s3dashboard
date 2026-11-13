@@ -228,6 +228,7 @@ def ingest_resume(user_id: str, profile: dict) -> int:
 
 def ingest_jobs(user_id: str, jobs: list) -> int:
     """Call after scrape-and-match saves jobs. Pass the jobs list."""
+    ensure_career_collection() 
     delete_user_chunks(user_id, "job_match")
     total = 0
 
@@ -301,6 +302,7 @@ def ingest_skill_gaps(user_id: str, gaps: list) -> int:
 
 # ── Vector search ─────────────────────────────────────────────────────────────
 def vector_search(user_id: str, query_vector: list[float], top_k: int = 20) -> list[dict]:
+    ensure_career_collection()
     results = qdrant.search(
         collection_name=CAREER_COLLECTION,
         query_vector=query_vector,

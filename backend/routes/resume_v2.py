@@ -5,6 +5,8 @@ from typing import Optional
 from agents.resume_scorer_v2 import run_resume_scorer_v2
 from agents.resume_improver_agent import run_resume_improver
 from utils.pdf_parser import extract_text_from_pdf
+from agents.resume_agent import run_resume_agent
+from database.mongo import save_ai_profile
 
 router = APIRouter(prefix="/resume", tags=["Resume v2"])
 
@@ -42,6 +44,19 @@ async def analyze_resume(
 
         if not result["success"]:
             raise HTTPException(status_code=500, detail=result.get("error", "Analysis failed"))
+
+        # ── Sync profile from this resume (non-fatal if it fails) ──
+        try:
+            agent_result = await run_resume_agent(file_bytes, user_id)
+            if agent_result["success"]:
+                profile = agent_result["profile"]
+                profile["ai_profile_score"] = result["overall_score"]  # see note below
+                await save_ai_profile(user_id, profile)
+                print(f"[Resume v2] Profile synced for user: {user_id}")
+            else:
+                print(f"[Resume v2] Profile sync failed: {agent_result.get('error')}")
+        except Exception as e:
+            print(f"[Resume v2] Profile sync error (non-fatal): {e}")
 
         return result
 
