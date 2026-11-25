@@ -24,7 +24,7 @@ async def generate_roadmap(req: GenerateRequest):
         raise HTTPException(status_code=500, detail=result.get("error"))
     return result
 
-
+#roadmap file is updated with role specific 
 # ─── GET /roadmap/{user_id} ──────────────────────────────────────────────────
 @router.get("/{user_id}")
 async def get_roadmap(user_id: str):
